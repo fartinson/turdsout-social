@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { engagementUi } from "@/lib/engagement-ui";
 import { routes } from "@/lib/routes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/pro-solid-svg-icons";
+import { faBookmark as faBookmarkSolid } from "@fortawesome/pro-solid-svg-icons";
+import { faBookmark as faBookmarkRegular } from "@fortawesome/pro-regular-svg-icons";
 
 type Props = {
   postId: string;
@@ -48,7 +52,10 @@ export function FeedPostEngagement({
         body: JSON.stringify({ value }),
       });
       if (!res.ok) return;
-      const data = (await res.json()) as { upvotes?: number; downvotes?: number };
+      const data = (await res.json()) as {
+        upvotes?: number;
+        downvotes?: number;
+      };
       if (typeof data.upvotes === "number") setUpvotes(data.upvotes);
       if (typeof data.downvotes === "number") setDownvotes(data.downvotes);
       setVote(value);
@@ -61,7 +68,9 @@ export function FeedPostEngagement({
       return;
     }
     startTransition(async () => {
-      const res = await fetch(`/api/posts/${postId}/bookmark`, { method: "POST" });
+      const res = await fetch(`/api/posts/${postId}/bookmark`, {
+        method: "POST",
+      });
       if (!res.ok) return;
       const data = (await res.json()) as { bookmarked?: boolean };
       if (typeof data.bookmarked === "boolean") setBookmarked(data.bookmarked);
@@ -70,7 +79,7 @@ export function FeedPostEngagement({
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-zinc-50 p-0.5 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <div className="border-border bg-surface/60 flex items-center gap-0.5 rounded-lg border p-0.5">
         <button
           type="button"
           disabled={pending}
@@ -78,11 +87,11 @@ export function FeedPostEngagement({
           aria-pressed={vote === 1}
           title={engagementUi.voteUp.accessibleName}
           aria-label={engagementUi.voteUp.accessibleName}
-          className="cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-zinc-700 aria-pressed:bg-white aria-pressed:shadow-sm dark:text-zinc-200 dark:aria-pressed:bg-zinc-950"
+          className="text-foreground aria-pressed:bg-background cursor-pointer rounded-md px-2 py-1 text-xs font-medium aria-pressed:shadow-sm"
         >
-          {engagementUi.voteUp.symbol}
+          <FontAwesomeIcon icon={faChevronUp} />
         </button>
-        <span className="min-w-6 px-1 text-center text-xs tabular-nums text-zinc-600 dark:text-zinc-400">
+        <span className="text-muted min-w-6 px-1 text-center text-xs tabular-nums">
           {net}
         </span>
         <button
@@ -92,9 +101,9 @@ export function FeedPostEngagement({
           aria-pressed={vote === -1}
           title={engagementUi.voteDown.accessibleName}
           aria-label={engagementUi.voteDown.accessibleName}
-          className="cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-zinc-700 aria-pressed:bg-white aria-pressed:shadow-sm dark:text-zinc-200 dark:aria-pressed:bg-zinc-950"
+          className="text-foreground aria-pressed:bg-background cursor-pointer rounded-md px-2 py-1 text-xs font-medium aria-pressed:shadow-sm"
         >
-          {engagementUi.voteDown.symbol}
+          <FontAwesomeIcon icon={faChevronDown} />
         </button>
       </div>
 
@@ -103,11 +112,21 @@ export function FeedPostEngagement({
         disabled={pending}
         onClick={toggleBookmark}
         aria-pressed={bookmarked}
-        title={bookmarked ? engagementUi.bookmark.removeAccessibleName : engagementUi.bookmark.addAccessibleName}
-        aria-label={bookmarked ? engagementUi.bookmark.removeAccessibleName : engagementUi.bookmark.addAccessibleName}
-        className="cursor-pointer rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium text-zinc-700 aria-pressed:border-amber-300 aria-pressed:bg-amber-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:aria-pressed:border-amber-600 dark:aria-pressed:bg-amber-950/40"
+        title={
+          bookmarked
+            ? engagementUi.bookmark.removeAccessibleName
+            : engagementUi.bookmark.addAccessibleName
+        }
+        aria-label={
+          bookmarked
+            ? engagementUi.bookmark.removeAccessibleName
+            : engagementUi.bookmark.addAccessibleName
+        }
+        className="border-border bg-background text-foreground aria-pressed:border-accent aria-pressed:bg-accent/15 cursor-pointer rounded-lg border px-2 py-1 text-xs font-medium"
       >
-        {bookmarked ? "★" : "☆"}
+        <FontAwesomeIcon
+          icon={bookmarked ? faBookmarkSolid : faBookmarkRegular}
+        />
       </button>
     </div>
   );

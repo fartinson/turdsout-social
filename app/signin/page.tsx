@@ -11,18 +11,26 @@ export default async function SignInPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-20">
-      <h1 className="text-balance text-3xl font-semibold tracking-tight">Sign in</h1>
-      <p className="mt-3 text-pretty text-sm text-zinc-600 dark:text-zinc-400">
-        Magic link. Zero passwords. Maximum middle-school energy.
+      <h1 className="text-3xl font-semibold tracking-tight text-balance">
+        Sign in to Turdsout
+      </h1>
+      <p className="mt-3 text-sm text-pretty text-muted">
+        We&apos;re trying to keep Turdsout bot-free and as human as poosible, so
+        you need to sign in with your email. Maximum middle-school energy.
       </p>
 
       <form
         className="mt-10 space-y-4"
         action={async (formData) => {
           "use server";
-          if (process.env.NODE_ENV === "production" && env.TURNSTILE_SECRET_KEY) {
+          if (
+            process.env.NODE_ENV === "production" &&
+            env.TURNSTILE_SECRET_KEY
+          ) {
             const token = formData.get("turnstileToken");
-            const verified = await verifyTurnstileToken(typeof token === "string" ? token : undefined);
+            const verified = await verifyTurnstileToken(
+              typeof token === "string" ? token : undefined,
+            );
             if (!verified.ok) {
               return;
             }
@@ -38,14 +46,14 @@ export default async function SignInPage() {
             required
             autoComplete="email"
             inputMode="email"
-            className="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none ring-0 transition focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950"
+            className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm ring-0 transition outline-none focus:border-border/70"
             placeholder="you@turdsout.com"
           />
         </label>
 
         <button
           type="submit"
-          className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+          className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
         >
           Email me a link
         </button>
@@ -53,11 +61,10 @@ export default async function SignInPage() {
         <TurnstileInput name="turnstileToken" />
       </form>
 
-      <p className="mt-6 text-xs text-zinc-500">
-        By continuing, you agree to receive a sign-in email. You can unsubscribe from non-auth emails anytime (we
-        won’t send any).
+      <p className="mt-6 text-xs text-muted">
+        By continuing, you agree to receive a sign-in email. You can unsubscribe
+        from non-auth emails anytime (we won’t send any).
       </p>
     </main>
   );
 }
-

@@ -104,9 +104,9 @@ export function TurnstileInput({ name, onToken }: { name: string; onToken?: (tok
       <div
         ref={containerRef}
         id={`turnstile-${reactId}`}
-        className="min-h-[65px] rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
+        className="min-h-[65px] rounded-xl border border-border bg-background p-3"
       />
-      <p className="mt-2 text-xs text-zinc-500">Quick bot-check (only in production).</p>
+      <p className="mt-2 text-xs text-muted">Quick bot-check (only in production).</p>
     </div>
   );
 }

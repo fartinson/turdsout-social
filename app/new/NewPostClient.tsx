@@ -37,12 +37,12 @@ export function NewPostClient() {
     <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">New Turdsout</h1>
-        <Link href="/" className="text-sm font-semibold text-zinc-700 hover:underline dark:text-zinc-300">
+        <Link href="/" className="text-sm font-semibold text-foreground hover:underline">
           Back
         </Link>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
         <label className="block">
           <span className="text-sm font-medium">Your line</span>
           <textarea
@@ -53,23 +53,23 @@ export function NewPostClient() {
             spellCheck={false}
             autoCorrect="off"
             autoCapitalize="off"
-            className="mt-2 w-full resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950"
+            className="mt-2 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-border/70"
             placeholder="Turdsout I peaked in middle school."
           />
         </label>
 
-        <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
+        <div className="mt-3 flex items-center justify-between text-xs text-muted">
           <span>{remaining} characters left</span>
         </div>
 
-        {error ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+        {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
 
         <TurnstileInput name="turnstileToken" onToken={setTurnstileToken} />
 
         <button
           onClick={() => startTransition(onSubmit)}
           disabled={isPending}
-          className="mt-5 inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+          className="mt-5 inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Posting…" : "Post"}
         </button>

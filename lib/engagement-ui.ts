@@ -3,13 +3,10 @@
  */
 export const engagementUi = {
   voteUp: {
-    /** Visible on the button (arrow is primary; this can stay empty) */
-    symbol: "▲",
     /** Screen readers + tooltips */
     accessibleName: "Upvote",
   },
   voteDown: {
-    symbol: "▼",
     accessibleName: "Downvote",
   },
   bookmark: {

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;
@@ -91,11 +92,25 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --surface: #0f1115;
+    --border: #232833;
+    --muted: #a6abb4;
+
+    /* Keep brand readable on dark surfaces */
+    --primary: #14b8a6;
+    --primary-foreground: #042f2e;
+    --accent: #22c55e;
+    --accent-foreground: #052e16;
   }
+}
+
+@utility prose-primary {
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-invert-links: var(--color-primary);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
