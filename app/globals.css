@@ -3,13 +3,88 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --muted: #64748b;
+  --surface: #ffffff;
+  --primary: #0d4f5c;
+  --primary-foreground: #f8fafc;
+  --accent: #14b8a6;
+  --accent-foreground: #042f2e;
+  --border: #e2e8f0;
 }
 
 @theme inline {
+  /* Layout breakpoints (in addition to Tailwind defaults). Prefer fluid type for text. */
+  --breakpoint-xs: 36rem;
+  --breakpoint-mdlg: 60rem;
+  --breakpoint-1xl: 90rem;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Fluid Font Sizes - Scale smoothly from mobile to desktop */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12-14px */
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); /* 14-16px */
+  --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16-18px */
+  --font-size-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); /* 18-20px */
+  --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); /* 20-24px */
+  --font-size-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem); /* 24-30px */
+  --font-size-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem); /* 30-36px */
+  --font-size-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem); /* 36-48px */
+  --font-size-5xl: clamp(3rem, 2.4rem + 3vw, 3.75rem); /* 48-60px */
+  --font-size-6xl: clamp(3.75rem, 3rem + 3.75vw, 4.5rem); /* 60-72px */
+  --font-size-7xl: clamp(4.5rem, 3.5rem + 5vw, 6rem); /* 72-96px */
+
+  /* Line Heights - Optimized for readability */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Tailwind Typography Tokens mapped to custom scale */
+  --text-xs: var(--font-size-xs);
+  --text-xs--line-height: var(--line-height-normal);
+  --text-sm: var(--font-size-sm);
+  --text-sm--line-height: var(--line-height-normal);
+  --text-base: var(--font-size-base);
+  --text-base--line-height: var(--line-height-relaxed);
+  --text-lg: var(--font-size-lg);
+  --text-lg--line-height: var(--line-height-normal);
+  --text-xl: var(--font-size-xl);
+  --text-xl--line-height: var(--line-height-snug);
+  --text-2xl: var(--font-size-2xl);
+  --text-2xl--line-height: var(--line-height-snug);
+  --text-3xl: var(--font-size-3xl);
+  --text-3xl--line-height: var(--line-height-tight);
+  --text-4xl: var(--font-size-4xl);
+  --text-4xl--line-height: var(--line-height-tight);
+  --text-5xl: var(--font-size-5xl);
+  --text-5xl--line-height: var(--line-height-tight);
+  --text-6xl: var(--font-size-6xl);
+  --text-6xl--line-height: var(--line-height-tight);
+  --text-7xl: var(--font-size-7xl);
+  --text-7xl--line-height: var(--line-height-tight);
+
+  --color-mono-100: rgb(255 255 255);
+  --color-mono-200: rgb(247 247 248);
+  --color-mono-300: rgb(240 241 244);
+  --color-mono-400: rgb(216 218 222);
+  --color-mono-500: rgb(166 171 180);
+  --color-mono-600: rgb(113 119 131);
+  --color-mono-700: rgb(85 89 97);
+  --color-mono-800: rgb(41 44 50);
+  --color-mono-900: rgb(24 26 30);
 }
 
 @media (prefers-color-scheme: dark) {
