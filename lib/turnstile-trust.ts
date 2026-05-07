@@ -18,9 +18,13 @@ async function hmacSha256(message: string, secret: string) {
     new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign", "verify"]
+    ["sign", "verify"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(message),
+  );
   return new Uint8Array(sig);
 }
 
@@ -41,7 +45,9 @@ export async function isTurnstileTrusted(opts: {
 
   let payload: Payload;
   try {
-    payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8")) as Payload;
+    payload = JSON.parse(
+      Buffer.from(payloadB64, "base64url").toString("utf8"),
+    ) as Payload;
   } catch {
     return false;
   }
@@ -56,15 +62,24 @@ export async function isTurnstileTrusted(opts: {
 
   // constant-time compare
   let diff = 0;
-  for (let i = 0; i < expectedSig.length; i++) diff |= expectedSig[i]! ^ actualSig[i]!;
+  for (let i = 0; i < expectedSig.length; i++)
+    diff |= expectedSig[i]! ^ actualSig[i]!;
   return diff === 0;
 }
 
-export async function setTurnstileTrustedCookie(res: NextResponse, userId: string) {
+export async function setTurnstileTrustedCookie(
+  res: NextResponse,
+  userId: string,
+) {
   if (!env.AUTH_SECRET) return;
 
-  const payload: Payload = { uid: userId, exp: Date.now() + MAX_AGE_SECONDS * 1000 };
-  const payloadB64 = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const payload: Payload = {
+    uid: userId,
+    exp: Date.now() + MAX_AGE_SECONDS * 1000,
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload), "utf8").toString(
+    "base64url",
+  );
   const sig = await hmacSha256(payloadB64, env.AUTH_SECRET);
   const value = `${payloadB64}.${base64url(sig)}`;
 
@@ -78,4 +93,3 @@ export async function setTurnstileTrustedCookie(res: NextResponse, userId: strin
 }
 
 export const TURNSTILE_TRUST_COOKIE_NAME = COOKIE_NAME;
-

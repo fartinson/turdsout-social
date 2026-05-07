@@ -7,4 +7,3 @@ export default async function MePage() {
   if (!session?.user?.id) redirect("/signin");
   return <ProfileEditorClient />;
 }
-

@@ -14,7 +14,7 @@ export default async function SignInPage() {
       <h1 className="text-3xl font-semibold tracking-tight text-balance">
         Sign in to Turdsout
       </h1>
-      <p className="mt-3 text-sm text-pretty text-muted">
+      <p className="text-muted mt-3 text-sm text-pretty">
         We&apos;re trying to keep Turdsout bot-free and as human as poosible, so
         you need to sign in with your email. Maximum middle-school energy.
       </p>
@@ -46,14 +46,14 @@ export default async function SignInPage() {
             required
             autoComplete="email"
             inputMode="email"
-            className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm ring-0 transition outline-none focus:border-border/70"
+            className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm ring-0 transition outline-none"
             placeholder="you@turdsout.com"
           />
         </label>
 
         <button
           type="submit"
-          className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+          className="bg-primary text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
         >
           Email me a link
         </button>
@@ -61,7 +61,7 @@ export default async function SignInPage() {
         <TurnstileInput name="turnstileToken" />
       </form>
 
-      <p className="mt-6 text-xs text-muted">
+      <p className="text-muted mt-6 text-xs">
         By continuing, you agree to receive a sign-in email. You can unsubscribe
         from non-auth emails anytime (we won’t send any).
       </p>

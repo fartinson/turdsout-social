@@ -6,7 +6,7 @@ const VoteSchema = new Schema(
     userId: { type: String, required: true, index: true },
     value: { type: Number, enum: [-1, 1], required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 VoteSchema.index({ postId: 1, userId: 1 }, { unique: true });
@@ -14,4 +14,3 @@ VoteSchema.index({ postId: 1, userId: 1 }, { unique: true });
 export type VoteDoc = InferSchemaType<typeof VoteSchema> & { _id: unknown };
 
 export const Vote = models.Vote || model("Vote", VoteSchema);
-

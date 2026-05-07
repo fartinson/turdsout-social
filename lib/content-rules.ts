@@ -7,10 +7,16 @@ export function validatePostBody(raw: string) {
   const body = raw.trim().replace(/\s+/g, " ");
 
   if (body.length < POST_MIN_CHARS) {
-    return { ok: false as const, reason: `Keep it going—at least ${POST_MIN_CHARS} characters.` };
+    return {
+      ok: false as const,
+      reason: `Keep it going—at least ${POST_MIN_CHARS} characters.`,
+    };
   }
   if (body.length > POST_MAX_CHARS) {
-    return { ok: false as const, reason: `Too long—max ${POST_MAX_CHARS} characters.` };
+    return {
+      ok: false as const,
+      reason: `Too long—max ${POST_MAX_CHARS} characters.`,
+    };
   }
   if (urlLike.test(body)) {
     return { ok: false as const, reason: "Links are disabled for now." };
@@ -21,4 +27,3 @@ export function validatePostBody(raw: string) {
 
   return { ok: true as const, body };
 }
-

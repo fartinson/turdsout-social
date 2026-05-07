@@ -1,7 +1,19 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { routes } from "@/lib/routes";
 import { Avatar } from "@/components/Avatar";
 import { FeedPostEngagement } from "@/components/FeedPostEngagement";
+import { SharePostButton } from "@/components/SharePostButton";
+
+const FeedCardTimestamp = dynamic(
+  () => import("./FeedCardTimestamp").then((m) => m.FeedCardTimestamp),
+  {
+    ssr: false,
+    loading: () => <span className="tabular-nums">…</span>,
+  },
+);
 
 export type FeedCardAuthor = {
   handle: string | null;
@@ -36,13 +48,11 @@ export function FeedCard({
   initialBookmarked,
   showTime = false,
 }: FeedCardProps) {
-  const created = createdAt ? new Date(createdAt) : new Date();
-
   return (
     <article className="border-border bg-surface rounded-2xl border p-5 shadow-sm">
       <Link
         href={routes.post(postId)}
-        className="text-foreground block text-base leading-7 text-pretty hover:underline"
+        className="text-foreground block text-base leading-7 text-pretty underline-offset-2 hover:underline"
       >
         {body}
       </Link>
@@ -70,15 +80,10 @@ export function FeedCard({
         )}
 
         <span>·</span>
-        {showTime ? (
-          <time dateTime={created.toISOString()}>
-            {created.toLocaleString()}
-          </time>
-        ) : (
-          <time dateTime={created.toISOString()}>
-            {created.toLocaleDateString()}
-          </time>
-        )}
+        <FeedCardTimestamp createdAt={createdAt} showTime={showTime} />
+
+        <span className="flex-1" />
+        <SharePostButton postId={postId} />
       </div>
 
       <FeedPostEngagement

@@ -9,6 +9,7 @@ import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
 import { FeedCard } from "@/components/FeedCard";
 import { Avatar } from "@/components/Avatar";
+import { FeedPostInviteCard } from "@/components/FeedPostInviteCard";
 
 export default async function PublicProfilePage({
   params,
@@ -122,6 +123,7 @@ export default async function PublicProfilePage({
           </div>
         )}
       </div>
+      <FeedPostInviteCard signedIn={Boolean(session?.user)} />
     </main>
   );
 }

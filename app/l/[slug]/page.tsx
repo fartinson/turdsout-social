@@ -83,12 +83,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const normalized = (slug ?? "").trim().toLowerCase();
-  if (!normalized || !isSafeSlug(normalized)) return { title: "Scroll" };
+  if (!normalized || !isSafeSlug(normalized)) return { title: "Turdsout" };
 
   const page = await getPageBySlug(normalized);
-  if (!page) return { title: "Scroll" };
+  if (!page) return { title: "Turdsout" };
 
-  const title = page.seo?.title ?? page.title ?? "Scroll";
+  const title = page.seo?.title ?? page.title ?? "Turdsout";
   const description = page.seo?.description ?? undefined;
   const ogImage = page.seo?.images?.[0]?.url ?? undefined;
 
@@ -109,7 +109,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ScrollPage({
+export default async function LorePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -151,7 +151,7 @@ export default async function ScrollPage({
       ) : null}
 
       {published || updated ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted">
+        <div className="text-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
           {published ? (
             <>
               <span>Published</span>

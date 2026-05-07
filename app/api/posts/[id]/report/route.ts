@@ -5,7 +5,10 @@ import { Post } from "@/models/Post";
 import { Report } from "@/models/Report";
 import { rateLimiters } from "@/lib/ratelimit";
 
-export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +18,8 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
   const limiter = rateLimiters.report;
   if (limiter) {
     const rl = await limiter.limit(`${session.user.id}:${ip ?? "noip"}`);
-    if (!rl.success) return NextResponse.json({ error: "Slow down." }, { status: 429 });
+    if (!rl.success)
+      return NextResponse.json({ error: "Slow down." }, { status: 429 });
   }
 
   const { id } = await context.params;
@@ -25,16 +29,24 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
   }
 
   const payload = (await req.json()) as { reason?: string };
-  const reason = String(payload.reason ?? "").trim().slice(0, 200);
-  if (!reason) return NextResponse.json({ error: "Missing reason." }, { status: 400 });
+  const reason = String(payload.reason ?? "")
+    .trim()
+    .slice(0, 200);
+  if (!reason)
+    return NextResponse.json({ error: "Missing reason." }, { status: 400 });
 
   await connectMongoose();
 
   const post = await Post.findById(id);
-  if (!post || post.status !== "live") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!post || post.status !== "live")
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   try {
-    await Report.create({ postId: post._id, reporterUserId: session.user.id, reason });
+    await Report.create({
+      postId: post._id,
+      reporterUserId: session.user.id,
+      reason,
+    });
   } catch {
     return NextResponse.json({ ok: true, alreadyReported: true });
   }
@@ -44,4 +56,3 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
 
   return NextResponse.json({ ok: true });
 }
-

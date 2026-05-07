@@ -2,7 +2,6 @@ import { MongoClient } from "mongodb";
 import { env } from "@/env";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __turdsoutMongoClientPromise: Promise<MongoClient> | undefined;
 }
 
@@ -22,4 +21,3 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export default clientPromise;
-

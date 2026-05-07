@@ -13,17 +13,21 @@ declare global {
           "error-callback"?: () => void;
           "expired-callback"?: () => void;
           appearance?: "always" | "execute" | "interaction-only";
-        }
+        },
       ) => string;
       reset: (widgetId: string) => void;
     };
   }
 }
 
-const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const SCRIPT_SRC =
+  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 function shouldEnable() {
-  return process.env.NODE_ENV === "production" && Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+  return (
+    process.env.NODE_ENV === "production" &&
+    Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+  );
 }
 
 function loadTurnstileScript() {
@@ -37,7 +41,13 @@ function loadTurnstileScript() {
   document.head.appendChild(script);
 }
 
-export function TurnstileInput({ name, onToken }: { name: string; onToken?: (token: string) => void }) {
+export function TurnstileInput({
+  name,
+  onToken,
+}: {
+  name: string;
+  onToken?: (token: string) => void;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [token, setToken] = useState("");
@@ -94,7 +104,7 @@ export function TurnstileInput({ name, onToken }: { name: string; onToken?: (tok
       }
       widgetIdRef.current = null;
     };
-  }, []);
+  }, [onToken]);
 
   if (!shouldEnable()) return null;
 
@@ -104,10 +114,11 @@ export function TurnstileInput({ name, onToken }: { name: string; onToken?: (tok
       <div
         ref={containerRef}
         id={`turnstile-${reactId}`}
-        className="min-h-[65px] rounded-xl border border-border bg-background p-3"
+        className="border-border bg-background min-h-[65px] rounded-xl border p-3"
       />
-      <p className="mt-2 text-xs text-muted">Quick bot-check (only in production).</p>
+      <p className="text-muted mt-2 text-xs">
+        Quick bot-check (only in production).
+      </p>
     </div>
   );
 }
-

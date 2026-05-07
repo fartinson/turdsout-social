@@ -2,12 +2,14 @@ import mongoose from "mongoose";
 import { env } from "@/env";
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __turdsoutMongooseConn: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;
+  var __turdsoutMongooseConn:
+    | { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null }
+    | undefined;
 }
 
 const globalState =
-  global.__turdsoutMongooseConn ?? (global.__turdsoutMongooseConn = { conn: null, promise: null });
+  global.__turdsoutMongooseConn ??
+  (global.__turdsoutMongooseConn = { conn: null, promise: null });
 
 export async function connectMongoose() {
   if (globalState.conn) return globalState.conn;
@@ -22,4 +24,3 @@ export async function connectMongoose() {
   globalState.conn = await globalState.promise;
   return globalState.conn;
 }
-

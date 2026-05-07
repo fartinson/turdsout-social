@@ -6,7 +6,6 @@ import { routes } from "@/lib/routes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPenToSquare,
-  faPlus,
   faUser,
   faWandMagicSparkles,
 } from "@fortawesome/pro-solid-svg-icons";
@@ -25,8 +24,10 @@ const NavLink = ({ href, children, className, ...props }: NavLinkProps) => {
     <Link
       href={href}
       className={cn(
-        "hover:bg-surface/70 inline-flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2",
-        isActive ? "text-primary bg-primary/10" : "text-foreground",
+        "inline-flex items-center gap-2 rounded-lg px-3 py-2",
+        isActive
+          ? "text-primary bg-primary/10 cursor-default"
+          : "text-foreground hover:bg-surface/70 cursor-pointer",
         className,
       )}
       {...props}
@@ -49,7 +50,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
         <Link
           href={routes.home}
-          className="text-lg font-semibold tracking-tight"
+          className="text-primary [font-family:var(--font-fraunces)] text-xl font-medium tracking-tight"
         >
           Turdsout
         </Link>

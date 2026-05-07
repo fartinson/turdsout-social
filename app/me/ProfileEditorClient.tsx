@@ -96,29 +96,27 @@ export function ProfileEditorClient() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Edit profile
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            {profile?.email ?? "@"}
-          </p>
+          <p className="text-muted mt-1 text-sm">{profile?.email ?? "@"}</p>
         </div>
         <Link
           href={routes.home}
-          className="text-sm font-semibold text-foreground hover:underline"
+          className="text-foreground text-sm font-semibold hover:underline"
         >
           Back
         </Link>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <div className="border-border bg-surface mt-6 rounded-2xl border p-5 shadow-sm">
         <div className="space-y-4">
           <label className="block">
             <span className="text-sm font-medium">Handle</span>
             <input
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition outline-none focus:border-border/70"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
               placeholder="your_handle"
             />
-            <p className="mt-2 text-xs text-muted">
+            <p className="text-muted mt-2 text-xs">
               Public profile:{" "}
               {publicUrl ? (
                 <Link href={publicUrl} className="font-medium hover:underline">
@@ -135,22 +133,26 @@ export function ProfileEditorClient() {
             <input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition outline-none focus:border-border/70"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
               placeholder="Optional"
             />
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium">Avatar URL</span>
+            <span className="text-sm font-medium">
+              Avatar URL || TODO - S3 bucket
+            </span>
             <input
+              disabled={true}
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm transition outline-none focus:border-border/70"
-              placeholder="https://…"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
+              // placeholder="https://…"
+              placeholder="TODO - enable this"
             />
           </label>
 
-          <label className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-sm">
+          <label className="border-border bg-background flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
             <input
               type="checkbox"
               checked={emailNotifications}
@@ -161,14 +163,12 @@ export function ProfileEditorClient() {
           </label>
         </div>
 
-        {error ? (
-          <p className="mt-4 text-sm text-red-600">{error}</p>
-        ) : null}
+        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
         <button
           onClick={save}
           disabled={isPending}
-          className="mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-primary text-primary-foreground mt-6 inline-flex w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Saving…" : "Save"}
         </button>

@@ -20,17 +20,29 @@ type FeedItem = {
 async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
   await connectMongoose();
   const sortSpec = sort === "new" ? "-_id" : "-upvotes -_id";
-  const posts = await Post.find({ status: "live" }).sort(sortSpec).limit(20).lean();
+  const posts = await Post.find({ status: "live" })
+    .sort(sortSpec)
+    .limit(20)
+    .lean();
 
-  const authorUserIds = Array.from(new Set(posts.map((p) => String(p.authorUserId)).filter(Boolean)));
+  const authorUserIds = Array.from(
+    new Set(posts.map((p) => String(p.authorUserId)).filter(Boolean)),
+  );
   const profiles = await UserProfile.find({ userId: { $in: authorUserIds } })
     .select({ userId: 1, handle: 1, avatarUrl: 1 })
     .lean();
-  const profileById = new Map<string, { userId: string; handle: string | null; avatarUrl: string | null }>(
+  const profileById = new Map<
+    string,
+    { userId: string; handle: string | null; avatarUrl: string | null }
+  >(
     profiles.map((p) => [
       String(p.userId),
-      { userId: String(p.userId), handle: p.handle ?? null, avatarUrl: p.avatarUrl ?? null },
-    ])
+      {
+        userId: String(p.userId),
+        handle: p.handle ?? null,
+        avatarUrl: p.avatarUrl ?? null,
+      },
+    ]),
   );
 
   const postIds = posts.map((p) => p._id);
@@ -60,8 +72,11 @@ async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
       upvotes: p.upvotes ?? 0,
       downvotes: p.downvotes ?? 0,
       createdAt: p.createdAt?.toISOString?.() ?? new Date().toISOString(),
-      author:
-        profileById.get(String(p.authorUserId)) ?? { userId: String(p.authorUserId), handle: null, avatarUrl: null },
+      author: profileById.get(String(p.authorUserId)) ?? {
+        userId: String(p.authorUserId),
+        handle: null,
+        avatarUrl: null,
+      },
       viewerVote: voteByPostId.get(String(p._id)) ?? 0,
       viewerBookmarked: bookmarkByPostId.has(String(p._id)),
     })),
@@ -75,7 +90,7 @@ export async function FeedList({ sort }: { sort: "top" | "new" }) {
 
   if (!feed.items.length) {
     return (
-      <div className="mt-4 rounded-2xl border border-dashed border-border bg-surface p-6 text-sm text-muted">
+      <div className="border-border bg-surface text-muted mt-4 rounded-2xl border border-dashed p-6 text-sm">
         Nothing yet. The first Turdsout is the hardest.
       </div>
     );
@@ -100,4 +115,3 @@ export async function FeedList({ sort }: { sort: "top" | "new" }) {
     </div>
   );
 }
-

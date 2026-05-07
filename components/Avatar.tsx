@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import Image from "next/image";
 import { useState } from "react";
 
 function initialsFromName(name: string) {
@@ -49,12 +50,12 @@ export function Avatar({ src, name, alt, size = 32, className }: AvatarProps) {
       title={name ? name : undefined}
     >
       {showImage ? (
-        // Using <img> (not next/image) so we can accept arbitrary user-provided URLs without config.
-        <img
+        <Image
           src={src!}
           alt={label}
+          width={size}
+          height={size}
           className="h-full w-full object-cover"
-          loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setBroken(true)}
         />

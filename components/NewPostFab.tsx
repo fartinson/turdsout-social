@@ -12,10 +12,9 @@ export function NewPostFab({ signedIn }: { signedIn: boolean }) {
       href={href}
       aria-label={label}
       title={label}
-      className="fixed bottom-6 right-6 z-50 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/10 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent dark:shadow-white/10"
+      className="bg-primary text-primary-foreground focus:ring-accent fixed right-6 bottom-6 z-50 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full shadow-lg shadow-black/10 transition hover:opacity-90 focus:ring-2 focus:outline-none dark:shadow-white/10"
     >
       <FontAwesomeIcon icon={faPenToSquare} className="text-lg" />
     </Link>
   );
 }
-

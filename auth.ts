@@ -8,7 +8,9 @@ import { connectMongoose } from "@/lib/mongoose";
 import { UserProfile } from "@/models/UserProfile";
 import { defaultHandleFromEmail, withSuffix } from "@/lib/handle";
 
-const hasAuthEnv = Boolean(env.AUTH_SECRET && env.AUTH_RESEND_KEY && env.AUTH_EMAIL_FROM);
+const hasAuthEnv = Boolean(
+  env.AUTH_SECRET && env.AUTH_RESEND_KEY && env.AUTH_EMAIL_FROM,
+);
 
 const nextAuth = hasAuthEnv
   ? NextAuth({
@@ -51,7 +53,9 @@ const nextAuth = hasAuthEnv
           const baseHandle = defaultHandleFromEmail(user.email);
           let handleToInsert = baseHandle;
           if (handleToInsert) {
-            const exists = await UserProfile.findOne({ handle: handleToInsert }).select({ _id: 1 }).lean();
+            const exists = await UserProfile.findOne({ handle: handleToInsert })
+              .select({ _id: 1 })
+              .lean();
             if (exists) {
               const suffix = Math.random().toString(36).slice(2, 6);
               handleToInsert = withSuffix(handleToInsert, suffix);
@@ -67,7 +71,7 @@ const nextAuth = hasAuthEnv
                 handle: handleToInsert,
               },
             },
-            { upsert: true }
+            { upsert: true },
           );
         },
       },
@@ -80,13 +84,14 @@ const missingAuthEnvResponse = () =>
       error:
         "Auth is not configured. Set AUTH_SECRET, AUTH_RESEND_KEY, and AUTH_EMAIL_FROM in your environment variables.",
     },
-    { status: 500 }
+    { status: 500 },
   );
 
 export const GET = nextAuth?.handlers.GET ?? missingAuthEnvResponse;
 export const POST = nextAuth?.handlers.POST ?? missingAuthEnvResponse;
 
 export const auth = nextAuth?.auth ?? (async () => null);
-export const signIn = nextAuth?.signIn ?? (async () => missingAuthEnvResponse());
-export const signOut = nextAuth?.signOut ?? (async () => missingAuthEnvResponse());
-
+export const signIn =
+  nextAuth?.signIn ?? (async () => missingAuthEnvResponse());
+export const signOut =
+  nextAuth?.signOut ?? (async () => missingAuthEnvResponse());

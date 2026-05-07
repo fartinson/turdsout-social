@@ -9,4 +9,3 @@ export default async function NewPostPage() {
 
   return <NewPostClient />;
 }
-

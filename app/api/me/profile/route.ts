@@ -23,7 +23,8 @@ const UpdateSchema = z.object({
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectMongoose();
   const profile = await UserProfile.findOne({ userId: session.user.id }).lean();
@@ -44,7 +45,8 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const contentType = req.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
@@ -52,14 +54,18 @@ export async function PATCH(req: NextRequest) {
   }
 
   const input = UpdateSchema.safeParse(await req.json());
-  if (!input.success) return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
+  if (!input.success)
+    return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
 
   await connectMongoose();
 
   const existing = await UserProfile.findOne({ userId: session.user.id });
   if (!existing) {
     // Should exist (created on verified sign-in), but be resilient.
-    return NextResponse.json({ error: "Profile missing. Please sign out and back in." }, { status: 409 });
+    return NextResponse.json(
+      { error: "Profile missing. Please sign out and back in." },
+      { status: 409 },
+    );
   }
 
   let nextHandle: string | null | undefined = undefined;
@@ -68,11 +74,17 @@ export async function PATCH(req: NextRequest) {
     nextHandle = normalized;
 
     if (nextHandle) {
-      const conflict = await UserProfile.findOne({ handle: nextHandle, userId: { $ne: session.user.id } })
+      const conflict = await UserProfile.findOne({
+        handle: nextHandle,
+        userId: { $ne: session.user.id },
+      })
         .select({ _id: 1 })
         .lean();
       if (conflict) {
-        return NextResponse.json({ error: "That handle is taken." }, { status: 409 });
+        return NextResponse.json(
+          { error: "That handle is taken." },
+          { status: 409 },
+        );
       }
     }
   }
@@ -90,9 +102,11 @@ export async function PATCH(req: NextRequest) {
     update.avatarUrl = v.length ? v : null;
   }
 
-  if (input.data.privacy?.showInFeed !== undefined) update["privacy.showInFeed"] = input.data.privacy.showInFeed;
+  if (input.data.privacy?.showInFeed !== undefined)
+    update["privacy.showInFeed"] = input.data.privacy.showInFeed;
   if (input.data.settings?.emailNotifications !== undefined)
-    update["settings.emailNotifications"] = input.data.settings.emailNotifications;
+    update["settings.emailNotifications"] =
+      input.data.settings.emailNotifications;
 
   // Ensure handle exists if user clears it.
   if (update.handle === null) {
@@ -117,4 +131,3 @@ export async function PATCH(req: NextRequest) {
       : null,
   });
 }
-

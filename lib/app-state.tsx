@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useMemo, useReducer, type Dispatch } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useReducer,
+  type Dispatch,
+} from "react";
 import { produce } from "immer";
 
 export type AppState = {
@@ -19,7 +25,10 @@ function reducer(state: AppState, action: AppAction) {
   return produce(state, (draft) => {
     switch (action.type) {
       case "toast":
-        draft.lastToast = { message: action.message, tone: action.tone ?? "neutral" };
+        draft.lastToast = {
+          message: action.message,
+          tone: action.tone ?? "neutral",
+        };
         return;
       case "toast/clear":
         draft.lastToast = null;
@@ -42,7 +51,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppStateContext.Provider value={stateValue}>
-      <AppDispatchContext.Provider value={dispatch}>{children}</AppDispatchContext.Provider>
+      <AppDispatchContext.Provider value={dispatch}>
+        {children}
+      </AppDispatchContext.Provider>
     </AppStateContext.Provider>
   );
 }
@@ -55,7 +66,7 @@ export function useAppState() {
 
 export function useAppDispatch() {
   const ctx = useContext(AppDispatchContext);
-  if (!ctx) throw new Error("useAppDispatch must be used within AppStateProvider");
+  if (!ctx)
+    throw new Error("useAppDispatch must be used within AppStateProvider");
   return ctx;
 }
-

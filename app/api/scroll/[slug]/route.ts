@@ -15,7 +15,7 @@ function isSafeSlug(slug: string) {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
   const normalized = (slug ?? "").trim().toLowerCase();
@@ -27,7 +27,7 @@ export async function GET(
   if (!env.HYGRAPH_API_URL || !env.HYGRAPH_API_TOKEN) {
     return NextResponse.json(
       { error: "Hygraph is not configured." },
-      { status: 501 }
+      { status: 501 },
     );
   }
 
@@ -65,15 +65,16 @@ export async function GET(
     cache: "no-store",
   });
 
-  const json = (await res.json().catch(() => null)) as HygraphPageResponse | null;
+  const json = (await res
+    .json()
+    .catch(() => null)) as HygraphPageResponse | null;
 
   if (!res.ok) {
     return NextResponse.json(
       { error: "Hygraph request failed.", status: res.status, details: json },
-      { status: 502 }
+      { status: 502 },
     );
   }
 
   return NextResponse.json(json, { status: 200 });
 }
-

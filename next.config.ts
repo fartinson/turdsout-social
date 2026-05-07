@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // TOTO - specify patter to s3 bucket
     remotePatterns: [
       {
         protocol: "https",

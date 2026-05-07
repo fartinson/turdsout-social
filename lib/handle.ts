@@ -19,4 +19,3 @@ export function withSuffix(base: string, suffix: string) {
   const trimmed = base.slice(0, maxBase);
   return `${trimmed}_${suffix}`;
 }
-
