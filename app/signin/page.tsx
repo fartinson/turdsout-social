@@ -4,6 +4,8 @@ import { TurnstileInput } from "@/components/TurnstileInput";
 import { env } from "@/env";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { routes } from "@/lib/routes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope } from "@fortawesome/pro-solid-svg-icons";
 
 export default async function SignInPage() {
   const session = await auth();
@@ -53,9 +55,9 @@ export default async function SignInPage() {
 
         <button
           type="submit"
-          className="bg-primary text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
+          className="bg-primary text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
         >
-          Email me a link
+          Send me a link <FontAwesomeIcon icon={faEnvelope} />
         </button>
 
         <TurnstileInput name="turnstileToken" />

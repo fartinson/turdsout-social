@@ -21,14 +21,10 @@ export default async function ContinueSignInPage({
     redirect(routes.signIn);
   }
 
-  async function continueSignIn() {
-    "use server";
-    const url = new URL("/api/auth/callback/resend", "http://localhost");
-    url.searchParams.set("token", token);
-    url.searchParams.set("email", email);
-    url.searchParams.set("callbackUrl", callbackUrl);
-    redirect(url.pathname + url.search);
-  }
+  const callbackHref =
+    `/api/auth/callback/resend?token=${encodeURIComponent(token)}` +
+    `&email=${encodeURIComponent(email)}` +
+    `&callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-20">
@@ -39,14 +35,13 @@ export default async function ContinueSignInPage({
         Continue to finish signing in to Turdsout.
       </p>
 
-      <form action={continueSignIn} className="mt-10">
-        <button
-          type="submit"
-          className="bg-primary text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
-        >
-          Continue <FontAwesomeIcon icon={faArrowRight} />
-        </button>
-      </form>
+      <a
+        href={callbackHref}
+        className="bg-primary text-primary-foreground mt-10 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
+        rel="nofollow"
+      >
+        Continue <FontAwesomeIcon icon={faArrowRight} />
+      </a>
 
       <p className="text-muted mt-6 text-xs">
         Didn&apos;t request this? You can close this tab.
