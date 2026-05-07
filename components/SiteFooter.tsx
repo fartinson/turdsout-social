@@ -7,6 +7,7 @@ import {
   faUser,
   faWandMagicSparkles,
   faRightToBracket,
+  faHandHoldingHeart,
 } from "@fortawesome/pro-solid-svg-icons";
 
 export async function SiteFooter() {
@@ -65,6 +66,14 @@ export async function SiteFooter() {
             className="hover:underline"
           >
             Terms
+          </Link>
+          <span className="text-muted">·</span>
+          <Link
+            href={routes.donate}
+            className="inline-flex items-center gap-2 hover:underline"
+          >
+            <FontAwesomeIcon icon={faHandHoldingHeart} className="text-xs" />
+            <span>Donate</span>
           </Link>
         </nav>
       </div>

@@ -13,6 +13,7 @@ import { FeedSkeleton } from "@/components/FeedSkeleton";
 import { FeedPostInviteCard } from "@/components/FeedPostInviteCard";
 import Link from "next/link";
 import { auth } from "@/auth";
+import { cn } from "@/lib/cn";
 
 export default async function Home({
   searchParams,
@@ -36,10 +37,14 @@ export default async function Home({
           >
             <div
               aria-hidden
-              className={[
+              // className={[
+              //   "bg-primary pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg transition-transform duration-200 ease-out",
+              //   sort === "new" ? "translate-x-full" : "translate-x-0",
+              // ].join(" ")}
+              className={cn(
                 "bg-primary pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg transition-transform duration-200 ease-out",
                 sort === "new" ? "translate-x-full" : "translate-x-0",
-              ].join(" ")}
+              )}
             />
             <Link
               href={routes.home}
@@ -53,7 +58,7 @@ export default async function Home({
               title="Trending"
             >
               <FontAwesomeIcon icon={faFire} className="text-xs" />
-              <span>Trending</span>
+              <span className="xs:inline hidden">Trending</span>
             </Link>
 
             <Link
@@ -68,12 +73,12 @@ export default async function Home({
               title="Recent"
             >
               <FontAwesomeIcon icon={faClock} className="text-xs" />
-              <span>Recent</span>
+              <span className="xs:inline hidden">Recent</span>
             </Link>
           </nav>
           <Link
             href={routes.page("what-is-turdsout")}
-            className="inline-flex items-center gap-2 font-semibold"
+            className="inline-flex shrink-0 items-center gap-2 font-semibold"
           >
             <FontAwesomeIcon icon={faInfoCircle} />
             <span>
