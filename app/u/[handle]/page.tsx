@@ -74,7 +74,7 @@ export default async function PublicProfilePage({
               @{profile.handle}
             </h1>
             <p className="text-muted mt-1 text-sm">
-              {posts.length} post{posts.length === 1 ? "" : "s"}
+              Turd Count: {posts.length}
             </p>
           </div>
         </div>

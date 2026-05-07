@@ -20,7 +20,7 @@ type HygraphPage = {
   id: string;
   slug: string;
   title: string | null;
-  updatedAt?: string | null;
+  createdAt?: string | null;
   publishedAt?: string | null;
   showAuthor?: boolean | null;
   author?: { name?: string | null } | null;
@@ -41,7 +41,7 @@ async function getPageBySlug(slug: string): Promise<HygraphPage | null> {
         id
         slug
         title
-        updatedAt
+        createdAt
         publishedAt
         showAuthor
         author {
@@ -126,8 +126,8 @@ export default async function LorePage({
     ? page.author?.name?.trim()
     : null;
   const showAuthor = Boolean(page.showAuthor && authorName);
+  const created = page.createdAt ? new Date(page.createdAt) : null;
   const published = page.publishedAt ? new Date(page.publishedAt) : null;
-  const updated = page.updatedAt ? new Date(page.updatedAt) : null;
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
@@ -150,22 +150,20 @@ export default async function LorePage({
         </div>
       ) : null}
 
-      {published || updated ? (
+      {created || published ? (
         <div className="text-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
+          {created ? (
+            <>
+              <span>Created</span>
+              <time dateTime={created.toISOString()}>{formatDate(created)}</time>
+            </>
+          ) : null}
+          {created && published ? <span>·</span> : null}
           {published ? (
             <>
               <span>Published</span>
               <time dateTime={published.toISOString()}>
                 {formatDate(published)}
-              </time>
-            </>
-          ) : null}
-          {published && updated ? <span>·</span> : null}
-          {updated ? (
-            <>
-              <span>Updated</span>
-              <time dateTime={updated.toISOString()}>
-                {formatDate(updated)}
               </time>
             </>
           ) : null}
