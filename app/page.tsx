@@ -5,7 +5,6 @@ import {
   faClock,
   faFire,
   faInfoCircle,
-  faQuestion,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Suspense } from "react";
 import { FeedList } from "@/components/FeedList";
