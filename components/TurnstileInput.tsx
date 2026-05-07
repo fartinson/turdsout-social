@@ -76,7 +76,7 @@ export function TurnstileInput({
         <Turnstile
           key={widgetId}
           id={widgetId}
-          className="bg-background min-h-[65px] rounded-xl"
+          className="bg-background rounded-xl"
           siteKey={siteKey}
           options={{ appearance: "interaction-only" }}
           onLoadScript={() => {

@@ -22,11 +22,62 @@ const nextAuth = hasAuthEnv
         Resend({
           apiKey: env.AUTH_RESEND_KEY!,
           from: env.AUTH_EMAIL_FROM!,
+          async sendVerificationRequest(params) {
+            const { identifier: to, url } = params;
+            const original = new URL(url);
+            const continueUrl = new URL("/signin/continue", original.origin);
+            for (const key of ["token", "email", "callbackUrl"]) {
+              const value = original.searchParams.get(key);
+              if (value) continueUrl.searchParams.set(key, value);
+            }
+
+            const host = continueUrl.host;
+            const subject = `Sign in to ${host}`;
+            const html = `
+              <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+                <h2 style="margin:0 0 12px 0;">Sign in to ${host}</h2>
+                <p style="margin:0 0 16px 0; line-height:1.4;">
+                  Click the button below to finish signing in.
+                </p>
+                <p style="margin:0 0 16px 0;">
+                  <a href="${continueUrl.toString()}" style="display:inline-block; background:#0d4f5c; color:#f8fafc; padding:10px 14px; border-radius:12px; text-decoration:none; font-weight:700;">
+                    Continue sign in
+                  </a>
+                </p>
+                <p style="margin:0; color:#64748b; font-size:12px; line-height:1.4;">
+                  If you didn’t request this email, you can safely ignore it.
+                </p>
+              </div>
+            `.trim();
+            const text = `Sign in to ${host}\n\nContinue: ${continueUrl.toString()}\n\nIf you didn’t request this email, ignore it.`;
+
+            const res = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${env.AUTH_RESEND_KEY!}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                from: env.AUTH_EMAIL_FROM!,
+                to,
+                subject,
+                html,
+                text,
+              }),
+            });
+
+            if (!res.ok) {
+              throw new Error(
+                `Resend error: ${JSON.stringify(await res.json().catch(() => null))}`,
+              );
+            }
+          },
         }),
       ],
       pages: {
         signIn: "/signin",
         verifyRequest: "/signin/check-email",
+        newUser: "/me",
       },
       session: {
         strategy: "database",

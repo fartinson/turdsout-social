@@ -18,9 +18,10 @@ export default async function Home({
   const sort = sp.sort === "new" ? ("new" as const) : ("top" as const);
   const session = await auth();
   const signedIn = Boolean(session?.user);
+  console.log("signedIn", signedIn);
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
-      <NewPostFab signedIn={false} />
+      <NewPostFab signedIn={signedIn} />
 
       <section className="mt-2">
         <div className="flex items-center justify-between gap-4">
