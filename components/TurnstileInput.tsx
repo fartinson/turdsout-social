@@ -1,7 +1,7 @@
 "use client";
 
 import { Turnstile } from "@marsidev/react-turnstile";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 
 function shouldEnable() {
   return (
@@ -22,6 +22,7 @@ export function TurnstileInput({
   const [widgetLoaded, setWidgetLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [reloadNonce, setReloadNonce] = useState(0);
+  const [trusted, setTrusted] = useState<boolean | null>(null);
   const reactId = useId();
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const widgetId = useMemo(
@@ -42,7 +43,29 @@ export function TurnstileInput({
     onToken?.("");
   }, [onToken]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function checkTrusted() {
+      // Only relevant when Turnstile is enabled (prod).
+      if (!enabled) return;
+      try {
+        const res = await fetch("/api/turnstile/trust", { method: "GET" });
+        const data = (await res.json().catch(() => null)) as {
+          trusted?: boolean;
+        } | null;
+        if (!cancelled) setTrusted(Boolean(data?.trusted));
+      } catch {
+        if (!cancelled) setTrusted(false);
+      }
+    }
+    checkTrusted();
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled]);
+
   if (!enabled) return null;
+  if (trusted === true) return null;
 
   return (
     <div className="mt-4">
@@ -50,7 +73,7 @@ export function TurnstileInput({
       <Turnstile
         key={widgetId}
         id={widgetId}
-        className="border-border bg-background min-h-[65px] rounded-xl border p-3"
+        className="bg-background min-h-[65px] rounded-xl"
         siteKey={siteKey}
         options={{ appearance: "interaction-only" }}
         onLoadScript={() => {
@@ -80,12 +103,10 @@ export function TurnstileInput({
           clearToken();
         }}
       />
-      <p className="text-muted mt-2 text-xs">
-        Quick bot-check (only in production).
-      </p>
+
       {loadError || !widgetLoaded ? (
-        <div className="mt-3 rounded-xl border border-dashed border-border bg-surface p-3 text-xs text-muted">
-          <p className="font-medium text-foreground">
+        <div className="border-border bg-surface text-muted mt-3 rounded-xl border border-dashed p-3 text-xs">
+          <p className="text-foreground font-medium">
             Bot-check didn&apos;t load.
           </p>
           <p className="mt-1">
@@ -94,7 +115,7 @@ export function TurnstileInput({
           </p>
           <button
             type="button"
-            className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-3 py-1.5 font-semibold text-foreground hover:bg-surface/60"
+            className="border-border bg-background text-foreground hover:bg-surface/60 mt-2 inline-flex cursor-pointer items-center justify-center rounded-lg border px-3 py-1.5 font-semibold"
             onClick={() => {
               setWidgetLoaded(false);
               setLoadError(false);
