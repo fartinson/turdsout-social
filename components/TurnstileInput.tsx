@@ -67,44 +67,48 @@ export function TurnstileInput({
   if (!enabled) return null;
   if (trusted === true) return null;
 
+  const showWidget = token.length === 0;
+
   return (
     <div className="mt-4">
       <input type="hidden" name={name} value={token} readOnly />
-      <Turnstile
-        key={widgetId}
-        id={widgetId}
-        className="bg-background min-h-[65px] rounded-xl"
-        siteKey={siteKey}
-        options={{ appearance: "interaction-only" }}
-        onLoadScript={() => {
-          setLoadError(false);
-        }}
-        scriptOptions={{
-          onError: () => {
+      {showWidget ? (
+        <Turnstile
+          key={widgetId}
+          id={widgetId}
+          className="bg-background min-h-[65px] rounded-xl"
+          siteKey={siteKey}
+          options={{ appearance: "interaction-only" }}
+          onLoadScript={() => {
+            setLoadError(false);
+          }}
+          scriptOptions={{
+            onError: () => {
+              setLoadError(true);
+            },
+          }}
+          onWidgetLoad={() => {
+            setWidgetLoaded(true);
+            setLoadError(false);
+          }}
+          onSuccess={onSuccess}
+          onExpire={clearToken}
+          onTimeout={clearToken}
+          onUnsupported={() => {
             setLoadError(true);
-          },
-        }}
-        onWidgetLoad={() => {
-          setWidgetLoaded(true);
-          setLoadError(false);
-        }}
-        onSuccess={onSuccess}
-        onExpire={clearToken}
-        onTimeout={clearToken}
-        onUnsupported={() => {
-          setLoadError(true);
-          clearToken();
-        }}
-        onError={(err) => {
-          // In the wild this is often ad/tracker blocking of challenges.cloudflare.com.
-          // We keep this visible to users via the fallback UI below.
-          console.warn("Turnstile error:", err);
-          setLoadError(true);
-          clearToken();
-        }}
-      />
+            clearToken();
+          }}
+          onError={(err) => {
+            // In the wild this is often ad/tracker blocking of challenges.cloudflare.com.
+            // We keep this visible to users via the fallback UI below.
+            console.warn("Turnstile error:", err);
+            setLoadError(true);
+            clearToken();
+          }}
+        />
+      ) : null}
 
-      {loadError || !widgetLoaded ? (
+      {showWidget && (loadError || !widgetLoaded) ? (
         <div className="border-border bg-surface text-muted mt-3 rounded-xl border border-dashed p-3 text-xs">
           <p className="text-foreground font-medium">
             Bot-check didn&apos;t load.
