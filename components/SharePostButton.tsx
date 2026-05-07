@@ -59,14 +59,14 @@ export function SharePostButton({ postId, className }: Props) {
       )}
       aria-label="Share post"
       aria-busy={pending}
-      title={copied ? "Copied link" : pending ? "Opening share…" : "Share"}
+      title={copied ? "Copied link" : pending ? "Share..." : "Share"}
     >
       <FontAwesomeIcon
         icon={pending ? faSpinner : faArrowUpFromBracket}
         spin={pending}
         className="text-xs"
       />
-      <span>{copied ? "Copied" : pending ? "Sharing" : "Share"}</span>
+      <span>{copied ? "Copied" : pending ? "Share..." : "Share"}</span>
     </button>
   );
 }
