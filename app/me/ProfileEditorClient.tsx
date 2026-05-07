@@ -140,7 +140,7 @@ export function ProfileEditorClient() {
 
           <label className="block">
             <span className="text-sm font-medium">
-              Avatar URL || TODO - S3 bucket
+              Avatar URL &bull; Coming soon
             </span>
             <input
               disabled={true}
@@ -148,7 +148,7 @@ export function ProfileEditorClient() {
               onChange={(e) => setAvatarUrl(e.target.value)}
               className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
               // placeholder="https://…"
-              placeholder="TODO - enable this"
+              placeholder="Coming soon"
             />
           </label>
 
