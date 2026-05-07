@@ -1,7 +1,12 @@
 import { routes } from "@/lib/routes";
 import { NewPostFab } from "@/components/NewPostFab";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock, faFire } from "@fortawesome/pro-solid-svg-icons";
+import {
+  faClock,
+  faFire,
+  faInfoCircle,
+  faQuestion,
+} from "@fortawesome/pro-solid-svg-icons";
 import { Suspense } from "react";
 import { FeedList } from "@/components/FeedList";
 import { FeedSkeleton } from "@/components/FeedSkeleton";
@@ -66,6 +71,15 @@ export default async function Home({
               <span>Recent</span>
             </Link>
           </nav>
+          <Link
+            href={routes.page("what-is-turdsout")}
+            className="inline-flex items-center gap-2 font-semibold"
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            <span>
+              What is <span className="font-header">Turdsout</span>?
+            </span>
+          </Link>
         </div>
         <Suspense fallback={<FeedSkeleton />}>
           <FeedList sort={sort} />

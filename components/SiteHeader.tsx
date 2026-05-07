@@ -50,7 +50,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
         <Link
           href={routes.home}
-          className="text-primary [font-family:var(--font-fraunces)] text-xl font-medium tracking-tight"
+          className="text-primary font-header text-xl font-medium tracking-tight"
         >
           Turdsout
         </Link>

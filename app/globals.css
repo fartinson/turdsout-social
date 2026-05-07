@@ -46,6 +46,7 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-header: var(--font-fraunces);
 
   /* Fluid Font Sizes - Scale smoothly from mobile to desktop */
   --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); /* 12-14px */
@@ -123,6 +124,12 @@
     --warning-foreground: #1c1917;
     --success: #22c55e;
     --success-foreground: #052e16;
+  }
+}
+
+@layer base {
+  a {
+    color: var(--primary);
   }
 }
 
