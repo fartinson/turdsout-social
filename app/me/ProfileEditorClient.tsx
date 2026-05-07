@@ -113,7 +113,7 @@ export function ProfileEditorClient() {
             <input
               value={handle}
               onChange={(e) => setHandle(e.target.value)}
-              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-base transition outline-none"
               placeholder="your_handle"
             />
             <p className="text-muted mt-2 text-xs">
@@ -133,7 +133,7 @@ export function ProfileEditorClient() {
             <input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-base transition outline-none"
               placeholder="Optional"
             />
           </label>
@@ -146,13 +146,13 @@ export function ProfileEditorClient() {
               disabled={true}
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
-              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm transition outline-none"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-base transition outline-none"
               // placeholder="https://…"
               placeholder="Coming soon"
             />
           </label>
 
-          <label className="border-border bg-background flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+          <label className="border-border bg-background flex items-center gap-3 rounded-xl border px-4 py-3 text-base">
             <input
               type="checkbox"
               checked={emailNotifications}

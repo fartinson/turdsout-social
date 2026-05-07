@@ -48,7 +48,7 @@ export default async function SignInPage() {
             required
             autoComplete="email"
             inputMode="email"
-            className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-sm ring-0 transition outline-none"
+            className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-base ring-0 transition outline-none"
             placeholder="you@turdsout.com"
           />
         </label>

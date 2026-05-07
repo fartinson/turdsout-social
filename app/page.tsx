@@ -36,10 +36,6 @@ export default async function Home({
           >
             <div
               aria-hidden
-              // className={[
-              //   "bg-primary pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg transition-transform duration-200 ease-out",
-              //   sort === "new" ? "translate-x-full" : "translate-x-0",
-              // ].join(" ")}
               className={cn(
                 "bg-primary pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg transition-transform duration-200 ease-out",
                 sort === "new" ? "translate-x-full" : "translate-x-0",
@@ -48,36 +44,39 @@ export default async function Home({
             <Link
               href={routes.home}
               aria-current={sort === "top" ? "page" : undefined}
-              className={[
+              className={cn(
                 "relative z-10 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
                 sort === "top"
                   ? "text-primary-foreground"
                   : "text-foreground hover:bg-surface/60",
-              ].join(" ")}
+              )}
               title="Trending"
             >
-              <FontAwesomeIcon icon={faFire} className="text-xs" />
+              <FontAwesomeIcon icon={faFire} className="xs:text-base text-sm" />
               <span className="xs:inline hidden">Trending</span>
             </Link>
 
             <Link
               href={`${routes.home}?sort=new`}
               aria-current={sort === "new" ? "page" : undefined}
-              className={[
+              className={cn(
                 "relative z-10 inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
                 sort === "new"
                   ? "text-primary-foreground"
                   : "text-foreground hover:bg-surface/60",
-              ].join(" ")}
+              )}
               title="Recent"
             >
-              <FontAwesomeIcon icon={faClock} className="text-xs" />
+              <FontAwesomeIcon
+                icon={faClock}
+                className="xs:text-base text-sm"
+              />
               <span className="xs:inline hidden">Recent</span>
             </Link>
           </nav>
           <Link
             href={routes.page("what-is-turdsout")}
-            className="inline-flex shrink-0 items-center gap-2 font-semibold"
+            className="inline-flex shrink-0 items-center gap-1 font-semibold"
           >
             <FontAwesomeIcon icon={faInfoCircle} />
             <span>

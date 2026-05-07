@@ -148,7 +148,7 @@ export function NewPostClient() {
               spellCheck={false}
               autoCorrect="off"
               autoCapitalize="off"
-              className="border-border bg-background focus:border-border/70 mt-2 w-full resize-none rounded-xl border px-4 py-3 text-sm transition outline-none"
+              className="border-border bg-background focus:border-border/70 mt-2 w-full resize-none rounded-xl border px-4 py-3 text-base transition outline-none"
               placeholder="Turdsout you peaked in middle school."
             />
           </label>

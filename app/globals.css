@@ -131,6 +131,13 @@
   a {
     color: var(--primary);
   }
+
+  /* iOS Safari zooms focused fields when font-size is below ~16px */
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+  }
 }
 
 @utility prose-primary {
