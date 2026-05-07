@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { routes } from "@/lib/routes";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/pro-regular-svg-icons";
 
 export default async function ContinueSignInPage({
   searchParams,
@@ -31,10 +33,10 @@ export default async function ContinueSignInPage({
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-20">
       <h1 className="text-3xl font-semibold tracking-tight text-balance">
-        Finish signing in
+        Welcome Back!
       </h1>
       <p className="text-muted mt-3 text-sm text-pretty">
-        Click continue to finish signing in to Turdsout.
+        Continue to finish signing in to Turdsout.
       </p>
 
       <form action={continueSignIn} className="mt-10">
@@ -42,7 +44,7 @@ export default async function ContinueSignInPage({
           type="submit"
           className="bg-primary text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
         >
-          Continue sign in
+          Continue <FontAwesomeIcon icon={faArrowRight} />
         </button>
       </form>
 
@@ -52,4 +54,3 @@ export default async function ContinueSignInPage({
     </main>
   );
 }
-
