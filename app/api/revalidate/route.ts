@@ -14,10 +14,21 @@ export async function POST(req: NextRequest) {
   }
 
   const body = (await req.json().catch(() => null)) as
-    | { slug?: string | null; path?: string | null; tags?: string[] | null }
+    | {
+        slug?: string | null;
+        path?: string | null;
+        tags?: string[] | null;
+        data?: { slug?: string | null } | null; // Hygraph webhook payload shape
+      }
     | null;
 
-  const slug = typeof body?.slug === "string" ? body.slug.trim().toLowerCase() : null;
+  const slugRaw =
+    typeof body?.slug === "string"
+      ? body.slug
+      : typeof body?.data?.slug === "string"
+        ? body.data.slug
+        : null;
+  const slug = slugRaw ? slugRaw.trim().toLowerCase() : null;
   const explicitPath = typeof body?.path === "string" ? body.path : null;
   const tags = Array.isArray(body?.tags) ? body?.tags.filter((t): t is string => typeof t === "string") : [];
 
