@@ -7,9 +7,9 @@ import {
   faInfoCircle,
 } from "@fortawesome/pro-solid-svg-icons";
 import { Suspense } from "react";
-import { FeedList } from "@/components/FeedList";
 import { FeedSkeleton } from "@/components/FeedSkeleton";
 import { FeedPostInviteCard } from "@/components/FeedPostInviteCard";
+import { FeedInfiniteList } from "@/components/FeedInfiniteList";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { cn } from "@/lib/cn";
@@ -23,7 +23,6 @@ export default async function Home({
   const sort = sp.sort === "new" ? ("new" as const) : ("top" as const);
   const session = await auth();
   const signedIn = Boolean(session?.user);
-  console.log("signedIn", signedIn);
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <NewPostFab signedIn={signedIn} />
@@ -85,7 +84,7 @@ export default async function Home({
           </Link>
         </div>
         <Suspense fallback={<FeedSkeleton />}>
-          <FeedList sort={sort} />
+          <FeedInfiniteList sort={sort} signedIn={signedIn} />
         </Suspense>
       </section>
       <FeedPostInviteCard signedIn={signedIn} />

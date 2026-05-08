@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { UserProfile } from "@/models/UserProfile";
+import { Vote } from "@/models/Vote";
+import { Bookmark } from "@/models/Bookmark";
 import { validatePostBody } from "@/lib/content-rules";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { rateLimiters } from "@/lib/ratelimit";
@@ -13,6 +15,9 @@ import {
 } from "@/lib/turnstile-trust";
 
 export async function GET(req: NextRequest) {
+  const session = await auth();
+  const viewerId = session?.user?.id ? String(session.user.id) : null;
+
   const url = new URL(req.url);
   const sort = url.searchParams.get("sort") === "new" ? "new" : "top";
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 20) || 20, 50);
@@ -43,28 +48,56 @@ export async function GET(req: NextRequest) {
     ),
   );
   const profiles = await UserProfile.find({ userId: { $in: authorUserIds } })
-    .select({ userId: 1, handle: 1 })
+    .select({ userId: 1, handle: 1, avatarUrl: 1 })
     .lean();
   const profileById = new Map<
     string,
-    { userId: string; handle: string | null }
+    { userId: string; handle: string | null; avatarUrl: string | null }
   >(
     profiles.map((p) => [
       String(p.userId),
-      { userId: String(p.userId), handle: p.handle ?? null },
+      {
+        userId: String(p.userId),
+        handle: p.handle ?? null,
+        avatarUrl: p.avatarUrl ?? null,
+      },
     ]),
   );
 
-  const items = posts.slice(0, limit).map((p) => ({
+  const pagePosts = posts.slice(0, limit);
+  const postIds = pagePosts.map((p) => p._id);
+
+  const voteByPostId = new Map<string, 1 | -1>();
+  const bookmarkByPostId = new Set<string>();
+  if (viewerId && postIds.length) {
+    const [votes, bookmarks] = await Promise.all([
+      Vote.find({ userId: viewerId, postId: { $in: postIds } })
+        .select({ postId: 1, value: 1 })
+        .lean(),
+      Bookmark.find({ userId: viewerId, postId: { $in: postIds } })
+        .select({ postId: 1 })
+        .lean(),
+    ]);
+    for (const v of votes) {
+      const id = String(v.postId);
+      if (v.value === 1 || v.value === -1) voteByPostId.set(id, v.value);
+    }
+    for (const b of bookmarks) bookmarkByPostId.add(String(b.postId));
+  }
+
+  const items = pagePosts.map((p) => ({
     id: String(p._id),
     body: p.body,
     upvotes: p.upvotes ?? 0,
     downvotes: p.downvotes ?? 0,
-    createdAt: p.createdAt,
+    createdAt: p.createdAt?.toISOString?.() ?? new Date().toISOString(),
     author: profileById.get(String(p.authorUserId)) ?? {
       userId: String(p.authorUserId),
       handle: null,
+      avatarUrl: null,
     },
+    viewerVote: viewerId ? (voteByPostId.get(String(p._id)) ?? 0) : 0,
+    viewerBookmarked: viewerId ? bookmarkByPostId.has(String(p._id)) : false,
   }));
 
   return NextResponse.json({ items, nextCursor });
