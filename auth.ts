@@ -31,25 +31,34 @@ const nextAuth = hasAuthEnv
               if (value) continueUrl.searchParams.set(key, value);
             }
 
-            const host = continueUrl.host;
-            const subject = `Sign in to ${host}`;
+            // Avoid putting bare hostnames in subject/body copy — many mail apps
+            // auto-link them to http(s)://host/ (home), which does not complete sign-in.
+            const subject = "Your Turdsout sign-in link";
+            const signInHref = continueUrl.toString();
             const html = `
               <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
-                <h2 style="margin:0 0 12px 0;">Sign in to ${host}</h2>
+                <h2 style="margin:0 0 12px 0;">Finish signing in to Turdsout</h2>
                 <p style="margin:0 0 16px 0; line-height:1.4;">
-                  Click the button below to finish signing in.
+                  Use the button below on the device where you want to stay signed in.
                 </p>
                 <p style="margin:0 0 16px 0;">
-                  <a href="${continueUrl.toString()}" style="display:inline-block; background:#0d4f5c; color:#f8fafc; padding:10px 14px; border-radius:12px; text-decoration:none; font-weight:700;">
+                  <a href="${signInHref}" style="display:inline-block; background:#0d4f5c; color:#f8fafc; padding:10px 14px; border-radius:12px; text-decoration:none; font-weight:700;">
                     Continue sign in
                   </a>
                 </p>
                 <p style="margin:0; color:#64748b; font-size:12px; line-height:1.4;">
-                  If you didn’t request this email, you can safely ignore it.
+                  If you didn't request this email, you can safely ignore it.
                 </p>
               </div>
             `.trim();
-            const text = `Sign in to ${host}\n\nContinue: ${continueUrl.toString()}\n\nIf you didn’t request this email, ignore it.`;
+            const text = [
+              "Finish signing in to Turdsout",
+              "",
+              "Open this link on the device where you want to stay signed in (it expires soon):",
+              signInHref,
+              "",
+              "If you didn't request this email, ignore it.",
+            ].join("\n");
 
             const res = await fetch("https://api.resend.com/emails", {
               method: "POST",
