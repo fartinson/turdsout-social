@@ -29,6 +29,9 @@ export const env = createEnv({
     // Hygraph (CMS)
     HYGRAPH_API_URL: z.string().url().optional(),
     HYGRAPH_API_TOKEN: z.string().min(1).optional(),
+
+    // Webhooks
+    REVALIDATE_WEBHOOK_SECRET: z.string().min(16).optional(),
   },
   client: {
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),

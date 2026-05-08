@@ -70,6 +70,7 @@ async function getPageBySlug(slug: string): Promise<HygraphPage | null> {
     body: JSON.stringify({ query, variables: { slug } }),
     next: {
       revalidate: 60 * 60 * 24 * 30, // 30 days
+      tags: [`hygraph-page:${slug}`],
     },
   });
 
