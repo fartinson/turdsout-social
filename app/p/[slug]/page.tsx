@@ -68,7 +68,9 @@ async function getPageBySlug(slug: string): Promise<HygraphPage | null> {
       authorization: `Bearer ${env.HYGRAPH_API_TOKEN}`,
     },
     body: JSON.stringify({ query, variables: { slug } }),
-    cache: "no-store",
+    next: {
+      revalidate: 60 * 60 * 24 * 30, // 30 days
+    },
   });
 
   if (!res.ok) return null;
@@ -122,7 +124,9 @@ export default async function PageBySlug({
   if (!page) notFound();
 
   const raw = page.content?.raw ?? null;
-  const authorName = page.author?.name?.trim() ? page.author?.name?.trim() : null;
+  const authorName = page.author?.name?.trim()
+    ? page.author?.name?.trim()
+    : null;
   const showAuthor = Boolean(page.showAuthor && authorName);
   const created = page.createdAt ? new Date(page.createdAt) : null;
   const published = page.publishedAt ? new Date(page.publishedAt) : null;
@@ -142,7 +146,8 @@ export default async function PageBySlug({
             className="bg-background"
           />
           <span className="text-muted">
-            By <span className="text-foreground font-semibold">{authorName}</span>
+            By{" "}
+            <span className="text-foreground font-semibold">{authorName}</span>
           </span>
         </div>
       ) : null}
@@ -152,7 +157,9 @@ export default async function PageBySlug({
           {created ? (
             <>
               <span>Created</span>
-              <time dateTime={created.toISOString()}>{formatDate(created)}</time>
+              <time dateTime={created.toISOString()}>
+                {formatDate(created)}
+              </time>
             </>
           ) : null}
           {created && published ? <span>·</span> : null}
@@ -177,4 +184,3 @@ export default async function PageBySlug({
     </main>
   );
 }
-
