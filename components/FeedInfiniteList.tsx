@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FeedCard } from "@/components/FeedCard";
 import { FeedSkeleton } from "@/components/FeedSkeleton";
 
@@ -31,36 +31,45 @@ export function FeedInfiniteList({
   const [error, setError] = useState<string | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const baseUrl = useMemo(() => {
-    const u = new URL("/api/posts", window.location.origin);
-    u.searchParams.set("sort", sort);
-    u.searchParams.set("limit", String(pageSize));
-    return u;
+  const basePath = useMemo(() => {
+    // Must be SSR-safe. Next can pre-render client components on the server.
+    const qs = new URLSearchParams({
+      sort,
+      limit: String(pageSize),
+    });
+    return `/api/posts?${qs.toString()}`;
   }, [pageSize, sort]);
 
-  async function loadPage(cursor: string | null) {
-    const u = new URL(baseUrl.toString());
-    if (cursor) u.searchParams.set("cursor", cursor);
-    const res = await fetch(u.toString(), { cache: "no-store" });
-    const data = (await res.json().catch(() => null)) as
-      | { items?: FeedItem[]; nextCursor?: string | null; error?: string }
-      | null;
-    if (!res.ok) {
-      throw new Error(data?.error ?? "Could not load feed.");
-    }
-    return {
-      items: data?.items ?? [],
-      nextCursor: data?.nextCursor ?? null,
-    };
-  }
+  const loadPage = useCallback(
+    async (cursor: string | null) => {
+      const url = cursor
+        ? `${basePath}&cursor=${encodeURIComponent(cursor)}`
+        : basePath;
+      const res = await fetch(url, { cache: "no-store" });
+      const data = (await res.json().catch(() => null)) as
+        | { items?: FeedItem[]; nextCursor?: string | null; error?: string }
+        | null;
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Could not load feed.");
+      }
+      return {
+        items: data?.items ?? [],
+        nextCursor: data?.nextCursor ?? null,
+      };
+    },
+    [basePath],
+  );
 
   // Initial load + reset on sort change
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setItems([]);
-    setNextCursor(null);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
+      setItems([]);
+      setNextCursor(null);
+    });
     (async () => {
       try {
         const page = await loadPage(null);
@@ -77,8 +86,7 @@ export function FeedInfiniteList({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, pageSize]);
+  }, [loadPage, pageSize, sort]);
 
   // Infinite scroll
   useEffect(() => {
@@ -111,7 +119,7 @@ export function FeedInfiniteList({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [loading, loadingMore, nextCursor]);
+  }, [loadPage, loading, loadingMore, nextCursor]);
 
   if (loading) return <FeedSkeleton />;
 
