@@ -157,7 +157,7 @@ export default async function PageBySlug({
         <div className="text-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
           {created ? (
             <>
-              <span>Created</span>
+              <span>Published</span>
               <time dateTime={created.toISOString()}>
                 {formatDate(created)}
               </time>
@@ -166,7 +166,7 @@ export default async function PageBySlug({
           {created && published ? <span>·</span> : null}
           {published ? (
             <>
-              <span>Published</span>
+              <span>Updated</span>
               <time dateTime={published.toISOString()}>
                 {formatDate(published)}
               </time>
