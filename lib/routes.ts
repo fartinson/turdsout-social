@@ -5,7 +5,7 @@ export const routes = {
   me: "/me",
   newPost: "/new",
   donate: "/donate",
-  post: (id: string) => `/p/${id}`,
+  post: (id: string) => `/t/${id}`,
   userProfile: (handle: string) => `/u/${handle}`,
-  page: (slug: string) => `/l/${slug}`,
+  page: (slug: string) => `/p/${slug}`,
 } as const;

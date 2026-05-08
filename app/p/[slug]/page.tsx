@@ -109,7 +109,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function LorePage({
+export default async function PageBySlug({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -122,9 +122,7 @@ export default async function LorePage({
   if (!page) notFound();
 
   const raw = page.content?.raw ?? null;
-  const authorName = page.author?.name?.trim()
-    ? page.author?.name?.trim()
-    : null;
+  const authorName = page.author?.name?.trim() ? page.author?.name?.trim() : null;
   const showAuthor = Boolean(page.showAuthor && authorName);
   const created = page.createdAt ? new Date(page.createdAt) : null;
   const published = page.publishedAt ? new Date(page.publishedAt) : null;
@@ -144,8 +142,7 @@ export default async function LorePage({
             className="bg-background"
           />
           <span className="text-muted">
-            By{" "}
-            <span className="text-foreground font-semibold">{authorName}</span>
+            By <span className="text-foreground font-semibold">{authorName}</span>
           </span>
         </div>
       ) : null}
@@ -180,3 +177,4 @@ export default async function LorePage({
     </main>
   );
 }
+
