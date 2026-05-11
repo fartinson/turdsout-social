@@ -1,31 +1,48 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { getApiUserId } from "@/lib/api-auth";
+import { toFeedItemJson } from "@/lib/json-feed-post";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { UserProfile } from "@/models/UserProfile";
 import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
 import { validatePostBody } from "@/lib/content-rules";
+import { getViewerFollowedUserIds } from "@/lib/follow";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { rateLimiters } from "@/lib/ratelimit";
 import {
   isTurnstileTrusted,
+  markDeviceTurnstileTrusted,
   setTurnstileTrustedCookie,
   TURNSTILE_TRUST_COOKIE_NAME,
 } from "@/lib/turnstile-trust";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  const viewerId = session?.user?.id ? String(session.user.id) : null;
+  const viewerId = (await getApiUserId(req)) ?? null;
 
   const url = new URL(req.url);
   const sort = url.searchParams.get("sort") === "new" ? "new" : "top";
+  const scope = url.searchParams.get("scope") === "following" ? "following" : "all";
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 20) || 20, 50);
   const cursor = url.searchParams.get("cursor");
+
+  if (scope === "following" && !viewerId) {
+    return NextResponse.json(
+      { error: "Sign in to view the Following feed." },
+      { status: 401 },
+    );
+  }
 
   await connectMongoose();
 
   const baseQuery: Record<string, unknown> = { status: "live" };
+  if (scope === "following" && viewerId) {
+    const followedUserIds = await getViewerFollowedUserIds(viewerId);
+    if (!followedUserIds.length) {
+      return NextResponse.json({ items: [], nextCursor: null });
+    }
+    baseQuery.authorUserId = { $in: followedUserIds };
+  }
   if (cursor) {
     baseQuery._id = { $lt: cursor };
   }
@@ -85,34 +102,34 @@ export async function GET(req: NextRequest) {
     for (const b of bookmarks) bookmarkByPostId.add(String(b.postId));
   }
 
-  const items = pagePosts.map((p) => ({
-    id: String(p._id),
-    body: p.body,
-    upvotes: p.upvotes ?? 0,
-    downvotes: p.downvotes ?? 0,
-    createdAt: p.createdAt?.toISOString?.() ?? new Date().toISOString(),
-    author: profileById.get(String(p.authorUserId)) ?? {
-      userId: String(p.authorUserId),
-      handle: null,
-      avatarUrl: null,
-    },
-    viewerVote: viewerId ? (voteByPostId.get(String(p._id)) ?? 0) : 0,
-    viewerBookmarked: viewerId ? bookmarkByPostId.has(String(p._id)) : false,
-  }));
+  const items = pagePosts.map((p) => {
+    const author =
+      profileById.get(String(p.authorUserId)) ?? {
+        userId: String(p.authorUserId),
+        handle: null,
+        avatarUrl: null,
+      };
+    return toFeedItemJson(
+      p,
+      author,
+      viewerId ? (voteByPostId.get(String(p._id)) ?? 0) : 0,
+      viewerId ? bookmarkByPostId.has(String(p._id)) : false,
+    );
+  });
 
   return NextResponse.json({ items, nextCursor });
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getApiUserId(req);
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const limiter = rateLimiters.createPost;
   if (limiter) {
-    const rl = await limiter.limit(`${session.user.id}:${ip ?? "noip"}`);
+    const rl = await limiter.limit(`${userId}:${ip ?? "noip"}`);
     if (!rl.success) {
       return NextResponse.json({ error: "Slow down." }, { status: 429 });
     }
@@ -127,6 +144,8 @@ export async function POST(req: NextRequest) {
     body?: string;
     hp?: string;
     turnstileToken?: string;
+    /** Optional: bound device session skips captcha (see turnstile-trust). */
+    refreshToken?: string;
   };
 
   if (body.hp) {
@@ -135,13 +154,24 @@ export async function POST(req: NextRequest) {
 
   const trusted = await isTurnstileTrusted({
     cookieValue: req.cookies.get(TURNSTILE_TRUST_COOKIE_NAME)?.value,
-    userId: session.user.id,
+    userId,
+    deviceIdHeader: req.headers.get("x-turdsout-device-id"),
+    refreshToken:
+      typeof body.refreshToken === "string" ? body.refreshToken : undefined,
   });
 
   if (!trusted) {
     const turnstile = await verifyTurnstileToken(body.turnstileToken, ip);
     if (!turnstile.ok) {
       return NextResponse.json({ error: turnstile.reason }, { status: 400 });
+    }
+    const deviceId = req.headers.get("x-turdsout-device-id")?.trim();
+    if (typeof body.refreshToken === "string" && deviceId) {
+      await markDeviceTurnstileTrusted({
+        refreshToken: body.refreshToken,
+        userId,
+        deviceId,
+      });
     }
   }
 
@@ -153,11 +183,11 @@ export async function POST(req: NextRequest) {
   await connectMongoose();
 
   const created = await Post.create({
-    authorUserId: session.user.id,
+    authorUserId: userId,
     body: validated.body,
   });
 
-  const profile = await UserProfile.findOne({ userId: String(session.user.id) })
+  const profile = await UserProfile.findOne({ userId: String(userId) })
     .select({ handle: 1, avatarUrl: 1 })
     .lean();
 
@@ -179,7 +209,7 @@ export async function POST(req: NextRequest) {
     { status: 201 },
   );
   if (!trusted) {
-    await setTurnstileTrustedCookie(res, session.user.id);
+    await setTurnstileTrustedCookie(res, userId);
   }
   return res;
 }

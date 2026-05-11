@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export:mobile-pages": "node --import tsx scripts/export-mobile-pages.ts",
     "lint:fix": "eslint --fix .",
     "lint": "eslint",
     "prettier:check": "prettier --check \"**/*.{ts,tsx}\"",
@@ -27,6 +28,7 @@
     "@upstash/redis": "^1.38.0",
     "clsx": "^2.1.1",
     "immer": "^11.1.6",
+    "jose": "^6.2.3",
     "mongodb": "^6.19.0",
     "mongoose": "^9.6.1",
     "next": "16.2.4",
@@ -47,6 +49,7 @@
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

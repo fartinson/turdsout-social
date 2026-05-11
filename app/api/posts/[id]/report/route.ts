@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { getApiUserId } from "@/lib/api-auth";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { Report } from "@/models/Report";
@@ -9,15 +9,15 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getApiUserId(req);
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const limiter = rateLimiters.report;
   if (limiter) {
-    const rl = await limiter.limit(`${session.user.id}:${ip ?? "noip"}`);
+    const rl = await limiter.limit(`${userId}:${ip ?? "noip"}`);
     if (!rl.success)
       return NextResponse.json({ error: "Slow down." }, { status: 429 });
   }
@@ -44,7 +44,7 @@ export async function POST(
   try {
     await Report.create({
       postId: post._id,
-      reporterUserId: session.user.id,
+      reporterUserId: userId,
       reason,
     });
   } catch {

@@ -10,12 +10,13 @@ export default async function ContinueSignInPage({
     token?: string;
     email?: string;
     callbackUrl?: string;
+    redirectTo?: string;
   }>;
 }) {
   const sp = (await searchParams) ?? {};
   const token = sp.token ?? "";
   const email = sp.email ?? "";
-  const callbackUrl = sp.callbackUrl ?? routes.home;
+  const callbackUrl = sp.callbackUrl ?? sp.redirectTo ?? routes.home;
 
   if (!token || !email) {
     redirect(routes.signIn);

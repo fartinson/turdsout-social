@@ -1,23 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/auth";
+import { getApiUserId } from "@/lib/api-auth";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { Bookmark } from "@/models/Bookmark";
 import { rateLimiters } from "@/lib/ratelimit";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await getApiUserId(req);
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const ip = _req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const limiter = rateLimiters.bookmark;
   if (limiter) {
-    const rl = await limiter.limit(`${session.user.id}:${ip ?? "noip"}`);
+    const rl = await limiter.limit(`${userId}:${ip ?? "noip"}`);
     if (!rl.success)
       return NextResponse.json({ error: "Slow down." }, { status: 429 });
   }
@@ -32,13 +32,13 @@ export async function POST(
 
   const existing = await Bookmark.findOne({
     postId: post._id,
-    userId: session.user.id,
+    userId,
   });
   if (existing) {
     await existing.deleteOne();
     return NextResponse.json({ ok: true, bookmarked: false });
   }
 
-  await Bookmark.create({ postId: post._id, userId: session.user.id });
+  await Bookmark.create({ postId: post._id, userId });
   return NextResponse.json({ ok: true, bookmarked: true });
 }

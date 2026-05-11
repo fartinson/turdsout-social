@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { env } from "@/env";
+import { connectMongoose } from "@/lib/mongoose";
+import { hashToken } from "@/lib/mobile-tokens";
+import { DeviceSession } from "@/models/DeviceSession";
 
 const COOKIE_NAME = "ts_trust";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -30,11 +33,10 @@ async function hmacSha256(message: string, secret: string) {
 
 type Payload = { uid: string; exp: number };
 
-export async function isTurnstileTrusted(opts: {
-  cookieValue: string | undefined;
-  userId: string;
-}) {
-  const { cookieValue, userId } = opts;
+async function verifyCookieTrusted(
+  cookieValue: string | undefined,
+  userId: string,
+) {
   if (!cookieValue) return false;
   if (!env.AUTH_SECRET) return false;
 
@@ -60,11 +62,84 @@ export async function isTurnstileTrusted(opts: {
   const actualSig = base64urlToBytes(sigB64);
   if (expectedSig.length !== actualSig.length) return false;
 
-  // constant-time compare
   let diff = 0;
   for (let i = 0; i < expectedSig.length; i++)
     diff |= expectedSig[i]! ^ actualSig[i]!;
   return diff === 0;
+}
+
+async function verifyMobileDeviceTrusted(opts: {
+  refreshToken: string;
+  userId: string;
+  deviceId: string;
+}) {
+  const { refreshToken, userId, deviceId } = opts;
+  await connectMongoose();
+  const tokenHash = hashToken(refreshToken);
+  const session = await DeviceSession.findOne({ tokenHash }).exec();
+  if (
+    !session ||
+    session.revokedAt ||
+    session.expiresAt.getTime() <= Date.now()
+  ) {
+    return false;
+  }
+  if (String(session.userId) !== userId) return false;
+  if (!session.deviceId || String(session.deviceId) !== deviceId) return false;
+  const until = session.turnstileTrustedUntil;
+  if (!until || until.getTime() <= Date.now()) return false;
+  return true;
+}
+
+export async function isTurnstileTrusted(opts: {
+  cookieValue: string | undefined;
+  userId: string;
+  deviceIdHeader?: string | null;
+  refreshToken?: string | null;
+}) {
+  const { cookieValue, userId, deviceIdHeader, refreshToken } = opts;
+
+  if (await verifyCookieTrusted(cookieValue, userId)) return true;
+
+  if (
+    refreshToken &&
+    deviceIdHeader &&
+    (await verifyMobileDeviceTrusted({
+      refreshToken,
+      userId,
+      deviceId: deviceIdHeader.trim(),
+    }))
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/** After a successful Turnstile verification on native, extend trust for that device session. */
+export async function markDeviceTurnstileTrusted(opts: {
+  refreshToken: string;
+  userId: string;
+  deviceId: string;
+}) {
+  const { refreshToken, userId, deviceId } = opts;
+  await connectMongoose();
+  const tokenHash = hashToken(refreshToken);
+  const until = new Date(Date.now() + MAX_AGE_SECONDS * 1000);
+  await DeviceSession.updateOne(
+    {
+      tokenHash,
+      userId,
+      revokedAt: null,
+      expiresAt: { $gt: new Date() },
+    },
+    {
+      $set: {
+        deviceId: deviceId.trim().slice(0, 200),
+        turnstileTrustedUntil: until,
+      },
+    },
+  );
 }
 
 export async function setTurnstileTrustedCookie(

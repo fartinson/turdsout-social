@@ -32,6 +32,15 @@ export const env = createEnv({
 
     // Webhooks
     REVALIDATE_WEBHOOK_SECRET: z.string().min(16).optional(),
+
+    /** HS256 signing key for native app access tokens; falls back to AUTH_SECRET. */
+    MOBILE_JWT_SECRET: z.string().min(1).optional(),
+
+    /** Sign in with Apple — verify `identityToken` (bundle id / service id). */
+    APPLE_CLIENT_ID: z.string().min(1).optional(),
+
+    /** Universal Links: `TEAMID.bundleid` for `/.well-known/apple-app-site-association`. */
+    MOBILE_APPLINKS_APP_ID: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),

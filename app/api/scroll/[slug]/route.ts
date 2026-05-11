@@ -1,17 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { env } from "@/env";
-
-type HygraphPageResponse =
-  | {
-      data?: { page?: unknown | null };
-      errors?: Array<{ message?: string }>;
-    }
-  | unknown;
-
-function isSafeSlug(slug: string) {
-  // about, privacy, terms, etc.
-  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
-}
+import {
+  MobileCmsError,
+  fetchMobileCmsPageBySlug,
+  isSafeCmsSlug,
+} from "@/lib/cms/mobile-pages";
 
 export async function GET(
   _req: NextRequest,
@@ -20,61 +12,29 @@ export async function GET(
   const { slug } = await params;
   const normalized = (slug ?? "").trim().toLowerCase();
 
-  if (!normalized || !isSafeSlug(normalized)) {
+  if (!normalized || !isSafeCmsSlug(normalized)) {
     return NextResponse.json({ error: "Invalid slug." }, { status: 400 });
   }
 
-  if (!env.HYGRAPH_API_URL || !env.HYGRAPH_API_TOKEN) {
-    return NextResponse.json(
-      { error: "Hygraph is not configured." },
-      { status: 501 },
-    );
-  }
+  try {
+    const page = await fetchMobileCmsPageBySlug(normalized);
 
-  // Uses the existing Hygraph `Page` model (slug/title/content/seo/pageType/inFooter).
-  const query = /* GraphQL */ `
-    query CmsPageBySlug($slug: String!) {
-      page(where: { slug: $slug }, stage: PUBLISHED) {
-        id
-        slug
-        title
-        pageType
-        inFooter
-        updatedAt
-        content {
-          raw
-        }
-        seo {
-          title
-          description
-          images {
-            url
-          }
-        }
-      }
+    if (!page) {
+      return NextResponse.json({ error: "Page not found." }, { status: 404 });
     }
-  `;
 
-  const res = await fetch(env.HYGRAPH_API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${env.HYGRAPH_API_TOKEN}`,
-    },
-    body: JSON.stringify({ query, variables: { slug: normalized } }),
-    cache: "no-store",
-  });
+    return NextResponse.json({ page }, { status: 200 });
+  } catch (error) {
+    if (error instanceof MobileCmsError) {
+      return NextResponse.json(
+        { error: error.message, details: error.details },
+        { status: error.status },
+      );
+    }
 
-  const json = (await res
-    .json()
-    .catch(() => null)) as HygraphPageResponse | null;
-
-  if (!res.ok) {
     return NextResponse.json(
-      { error: "Hygraph request failed.", status: res.status, details: json },
-      { status: 502 },
+      { error: "Could not load CMS page." },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json(json, { status: 200 });
 }

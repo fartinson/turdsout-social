@@ -26,9 +26,18 @@ const nextAuth = hasAuthEnv
             const { identifier: to, url } = params;
             const original = new URL(url);
             const continueUrl = new URL("/signin/continue", original.origin);
-            for (const key of ["token", "email", "callbackUrl"]) {
+            for (const key of ["token", "email"]) {
               const value = original.searchParams.get(key);
               if (value) continueUrl.searchParams.set(key, value);
+            }
+
+            // Preserve the post-auth destination for the mobile flow even if
+            // upstream auth code uses `redirectTo` instead of `callbackUrl`.
+            const callbackUrl =
+              original.searchParams.get("callbackUrl") ??
+              original.searchParams.get("redirectTo");
+            if (callbackUrl) {
+              continueUrl.searchParams.set("callbackUrl", callbackUrl);
             }
 
             // Avoid putting bare hostnames in subject/body copy — many mail apps

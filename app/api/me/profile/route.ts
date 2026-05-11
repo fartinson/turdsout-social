@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { auth } from "@/auth";
+import { getApiUserId } from "@/lib/api-auth";
 import { connectMongoose } from "@/lib/mongoose";
+import { getFollowCountsMap } from "@/lib/follow";
 import { UserProfile } from "@/models/UserProfile";
 import { defaultHandleFromEmail, normalizeHandle } from "@/lib/handle";
 
@@ -21,13 +22,20 @@ const UpdateSchema = z.object({
     .optional(),
 });
 
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id)
+export async function GET(req: NextRequest) {
+  const userId = await getApiUserId(req);
+  if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   await connectMongoose();
-  const profile = await UserProfile.findOne({ userId: session.user.id }).lean();
+  const profile = await UserProfile.findOne({ userId }).lean();
+  const counts =
+    userId
+      ? (await getFollowCountsMap([userId])).get(userId) ?? {
+          followersCount: 0,
+          followingCount: 0,
+        }
+      : { followersCount: 0, followingCount: 0 };
   return NextResponse.json({
     profile: profile
       ? {
@@ -38,14 +46,16 @@ export async function GET() {
           avatarUrl: profile.avatarUrl ?? null,
           privacy: profile.privacy ?? { showInFeed: true },
           settings: profile.settings ?? { emailNotifications: false },
+          followersCount: counts.followersCount,
+          followingCount: counts.followingCount,
         }
       : null,
   });
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id)
+  const userId = await getApiUserId(req);
+  if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const contentType = req.headers.get("content-type") ?? "";
@@ -59,7 +69,7 @@ export async function PATCH(req: NextRequest) {
 
   await connectMongoose();
 
-  const existing = await UserProfile.findOne({ userId: session.user.id });
+  const existing = await UserProfile.findOne({ userId });
   if (!existing) {
     // Should exist (created on verified sign-in), but be resilient.
     return NextResponse.json(
@@ -76,7 +86,7 @@ export async function PATCH(req: NextRequest) {
     if (nextHandle) {
       const conflict = await UserProfile.findOne({
         handle: nextHandle,
-        userId: { $ne: session.user.id },
+        userId: { $ne: userId },
       })
         .select({ _id: 1 })
         .lean();
@@ -114,8 +124,15 @@ export async function PATCH(req: NextRequest) {
     if (fallback) update.handle = fallback;
   }
 
-  await UserProfile.updateOne({ userId: session.user.id }, { $set: update });
-  const fresh = await UserProfile.findOne({ userId: session.user.id }).lean();
+  await UserProfile.updateOne({ userId }, { $set: update });
+  const fresh = await UserProfile.findOne({ userId }).lean();
+  const counts =
+    userId
+      ? (await getFollowCountsMap([userId])).get(userId) ?? {
+          followersCount: 0,
+          followingCount: 0,
+        }
+      : { followersCount: 0, followingCount: 0 };
 
   return NextResponse.json({
     profile: fresh
@@ -127,6 +144,8 @@ export async function PATCH(req: NextRequest) {
           avatarUrl: fresh.avatarUrl ?? null,
           privacy: fresh.privacy ?? { showInFeed: true },
           settings: fresh.settings ?? { emailNotifications: false },
+          followersCount: counts.followersCount,
+          followingCount: counts.followingCount,
         }
       : null,
   });
