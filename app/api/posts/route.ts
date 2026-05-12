@@ -22,7 +22,8 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const sort = url.searchParams.get("sort") === "new" ? "new" : "top";
-  const scope = url.searchParams.get("scope") === "following" ? "following" : "all";
+  const scope =
+    url.searchParams.get("scope") === "following" ? "following" : "all";
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 20) || 20, 50);
   const cursor = url.searchParams.get("cursor");
 
@@ -103,12 +104,11 @@ export async function GET(req: NextRequest) {
   }
 
   const items = pagePosts.map((p) => {
-    const author =
-      profileById.get(String(p.authorUserId)) ?? {
-        userId: String(p.authorUserId),
-        handle: null,
-        avatarUrl: null,
-      };
+    const author = profileById.get(String(p.authorUserId)) ?? {
+      userId: String(p.authorUserId),
+      handle: null,
+      avatarUrl: null,
+    };
     return toFeedItemJson(
       p,
       author,

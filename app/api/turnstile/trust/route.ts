@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getApiUserId } from "@/lib/api-auth";
-import { isTurnstileTrusted, TURNSTILE_TRUST_COOKIE_NAME } from "@/lib/turnstile-trust";
+import {
+  isTurnstileTrusted,
+  TURNSTILE_TRUST_COOKIE_NAME,
+} from "@/lib/turnstile-trust";
 
 export async function GET(req: NextRequest) {
   const userId = await getApiUserId(req);
@@ -17,4 +20,3 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ trusted });
 }
-

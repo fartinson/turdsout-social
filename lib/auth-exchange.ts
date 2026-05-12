@@ -15,9 +15,7 @@ export async function createExchangeCode(userId: string): Promise<string> {
 }
 
 /** Returns user id if valid single-use code, else null. */
-export async function consumeExchangeCode(
-  raw: string,
-): Promise<string | null> {
+export async function consumeExchangeCode(raw: string): Promise<string | null> {
   await connectMongoose();
   const codeHash = hashToken(raw.trim());
   const doc = await AuthExchangeCode.findOne({

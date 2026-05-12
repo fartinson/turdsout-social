@@ -13,4 +13,5 @@ export type AppleLinkDoc = InferSchemaType<typeof AppleLinkSchema> & {
   _id: unknown;
 };
 
-export const AppleLink = models.AppleLink || model("AppleLink", AppleLinkSchema);
+export const AppleLink =
+  models.AppleLink || model("AppleLink", AppleLinkSchema);

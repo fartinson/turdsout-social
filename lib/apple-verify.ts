@@ -1,8 +1,6 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
-const JWKS = createRemoteJWKSet(
-  new URL("https://appleid.apple.com/auth/keys"),
-);
+const JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
 export type AppleIdPayload = {
   sub: string;

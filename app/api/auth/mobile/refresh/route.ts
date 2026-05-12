@@ -14,19 +14,24 @@ export async function POST(req: NextRequest) {
   const refreshToken =
     typeof body.refreshToken === "string" ? body.refreshToken.trim() : "";
   if (!refreshToken) {
-    return NextResponse.json({ error: "Missing refreshToken." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing refreshToken." },
+      { status: 400 },
+    );
   }
 
   const ua = req.headers.get("user-agent");
   const next = await rotateRefreshToken({
     refreshToken,
-    deviceId:
-      typeof body.deviceId === "string" ? body.deviceId : undefined,
+    deviceId: typeof body.deviceId === "string" ? body.deviceId : undefined,
     userAgent: ua,
   });
 
   if (!next) {
-    return NextResponse.json({ error: "Invalid or expired refresh." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired refresh." },
+      { status: 401 },
+    );
   }
 
   return NextResponse.json({

@@ -34,8 +34,7 @@ export function toFeedItemJson(
     body: String(post.body),
     upvotes: post.upvotes ?? 0,
     downvotes: post.downvotes ?? 0,
-    createdAt:
-      post.createdAt?.toISOString?.() ?? new Date().toISOString(),
+    createdAt: post.createdAt?.toISOString?.() ?? new Date().toISOString(),
     author,
     viewerVote,
     viewerBookmarked,

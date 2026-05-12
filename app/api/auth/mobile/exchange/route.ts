@@ -19,14 +19,16 @@ export async function POST(req: NextRequest) {
 
   const userId = await consumeExchangeCode(code);
   if (!userId) {
-    return NextResponse.json({ error: "Invalid or expired code." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired code." },
+      { status: 401 },
+    );
   }
 
   const ua = req.headers.get("user-agent");
   const tokens = await issueDeviceTokens({
     userId,
-    deviceId:
-      typeof body.deviceId === "string" ? body.deviceId : undefined,
+    deviceId: typeof body.deviceId === "string" ? body.deviceId : undefined,
     userAgent: ua,
   });
 

@@ -46,9 +46,11 @@ export function FeedInfiniteList({
         ? `${basePath}&cursor=${encodeURIComponent(cursor)}`
         : basePath;
       const res = await fetch(url, { cache: "no-store" });
-      const data = (await res.json().catch(() => null)) as
-        | { items?: FeedItem[]; nextCursor?: string | null; error?: string }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        items?: FeedItem[];
+        nextCursor?: string | null;
+        error?: string;
+      } | null;
       if (!res.ok) {
         throw new Error(data?.error ?? "Could not load feed.");
       }
@@ -167,4 +169,3 @@ export function FeedInfiniteList({
     </div>
   );
 }
-

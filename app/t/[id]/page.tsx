@@ -122,4 +122,3 @@ export default async function PostPermalinkPage({
     </main>
   );
 }
-

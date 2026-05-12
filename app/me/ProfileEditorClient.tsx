@@ -21,7 +21,6 @@ export function ProfileEditorClient() {
 
   const [handle, setHandle] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(false);
 
   const publicUrl = useMemo(() => {
@@ -47,7 +46,6 @@ export function ProfileEditorClient() {
       setProfile(data.profile);
       setHandle(data.profile.handle ?? "");
       setDisplayName(data.profile.displayName ?? "");
-      setAvatarUrl(data.profile.avatarUrl ?? "");
       setEmailNotifications(Boolean(data.profile.settings?.emailNotifications));
     })();
     return () => {
@@ -64,7 +62,6 @@ export function ProfileEditorClient() {
         body: JSON.stringify({
           handle,
           displayName,
-          avatarUrl,
           settings: { emailNotifications },
         }),
       });
@@ -81,7 +78,6 @@ export function ProfileEditorClient() {
         setProfile(data.profile);
         setHandle(data.profile.handle ?? "");
         setDisplayName(data.profile.displayName ?? "");
-        setAvatarUrl(data.profile.avatarUrl ?? "");
         setEmailNotifications(
           Boolean(data.profile.settings?.emailNotifications),
         );
@@ -138,19 +134,24 @@ export function ProfileEditorClient() {
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium">
-              Avatar URL &bull; Coming soon
-            </span>
-            <input
-              disabled={true}
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              className="border-border bg-background focus:border-border/70 mt-2 w-full rounded-xl border px-4 py-3 text-base transition outline-none"
-              // placeholder="https://…"
-              placeholder="Coming soon"
-            />
-          </label>
+          <section className="border-border bg-background rounded-xl border p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <h2 className="text-sm font-medium">Profile photo</h2>
+                <p className="text-muted text-sm">
+                  Avatar uploads are handled in the Turdsout app. Open the app
+                  to add, change, or remove your profile photo.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled
+                className="border-border bg-surface text-muted inline-flex cursor-not-allowed items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold opacity-80"
+              >
+                App Store link coming soon
+              </button>
+            </div>
+          </section>
 
           <label className="border-border bg-background flex items-center gap-3 rounded-xl border px-4 py-3 text-base">
             <input

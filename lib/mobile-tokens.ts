@@ -29,9 +29,7 @@ export async function signAccessToken(userId: string): Promise<string | null> {
     .sign(secret);
 }
 
-export async function verifyAccessToken(
-  token: string,
-): Promise<string | null> {
+export async function verifyAccessToken(token: string): Promise<string | null> {
   const secret = getJwtSecret();
   if (!secret) return null;
 

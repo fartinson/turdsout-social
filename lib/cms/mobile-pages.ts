@@ -148,15 +148,13 @@ export function isSafeCmsSlug(slug: string) {
 export async function fetchMobileCmsPageSummaries(): Promise<
   MobileCmsPageSummary[]
 > {
-  const data = await fetchHygraphCollection<HygraphPageSummary>(
-    /* GraphQL */ `
+  const data = await fetchHygraphCollection<HygraphPageSummary>(/* GraphQL */ `
       query CmsPagesForAppMenu {
         pages(where: { inFooter: true }, stage: PUBLISHED, orderBy: title_ASC) {
           ${HYGRAPH_PAGE_SUMMARY_FIELDS}
         }
       }
-    `,
-  );
+    `);
 
   return normalizePageSummaries(data);
 }
@@ -177,15 +175,13 @@ export async function fetchMobileCmsPageBySlug(
 
 export async function fetchMobileCmsBundle(): Promise<MobileCmsBundle> {
   const [footerPages, pinnedPages] = await Promise.all([
-    fetchHygraphCollection<HygraphPage>(
-      /* GraphQL */ `
+    fetchHygraphCollection<HygraphPage>(/* GraphQL */ `
         query CmsPagesForMobileBundle {
           pages(where: { inFooter: true }, stage: PUBLISHED, orderBy: title_ASC) {
             ${HYGRAPH_PAGE_DETAIL_FIELDS}
           }
         }
-      `,
-    ),
+      `),
     Promise.all(
       MOBILE_CMS_PINNED_SLUGS.map(async (slug) => fetchHygraphPage(slug)),
     ),
@@ -235,7 +231,10 @@ async function fetchHygraphSingle<T>(
   query: string,
   variables?: Record<string, unknown>,
 ) {
-  const payload = await postToHygraph<HygraphSingleResponse<T>>(query, variables);
+  const payload = await postToHygraph<HygraphSingleResponse<T>>(
+    query,
+    variables,
+  );
   return payload?.data?.page ?? null;
 }
 
@@ -257,9 +256,9 @@ async function postToHygraph<T>(
     cache: "no-store",
   });
 
-  const json = (await res.json().catch(() => null)) as
-    | { errors?: Array<{ message?: string }> }
-    | null;
+  const json = (await res.json().catch(() => null)) as {
+    errors?: Array<{ message?: string }>;
+  } | null;
 
   if (!res.ok) {
     throw new MobileCmsError("Hygraph request failed.", 502, {
@@ -285,14 +284,14 @@ function normalizePageSummaries(
     .map(normalizePageSummary);
 }
 
-function normalizePageDetails(
-  pages: Array<HygraphPage | null>,
-): HygraphPage[] {
+function normalizePageDetails(pages: Array<HygraphPage | null>): HygraphPage[] {
   return pages.filter((page): page is HygraphPage => Boolean(page?.slug));
 }
 
 function normalizePageSummary(page: HygraphPageSummary): MobileCmsPageSummary {
-  const slug = String(page.slug ?? "").trim().toLowerCase();
+  const slug = String(page.slug ?? "")
+    .trim()
+    .toLowerCase();
 
   return {
     id: String(page.id ?? slug),
@@ -418,7 +417,9 @@ function collectInlineRuns(
   inheritedLink: string | null = null,
 ): MobileCmsTextRun[] {
   const nextLink =
-    node.type === "link" && node.href?.trim() ? node.href.trim() : inheritedLink;
+    node.type === "link" && node.href?.trim()
+      ? node.href.trim()
+      : inheritedLink;
 
   if (typeof node.text === "string") {
     return node.text.length === 0

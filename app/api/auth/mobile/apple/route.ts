@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
   const identityToken =
     typeof body.identityToken === "string" ? body.identityToken.trim() : "";
   if (!identityToken) {
-    return NextResponse.json({ error: "Missing identityToken." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing identityToken." },
+      { status: 400 },
+    );
   }
 
   let sub: string;
@@ -47,7 +50,10 @@ export async function POST(req: NextRequest) {
     sub = p.sub;
     email = p.email;
   } catch {
-    return NextResponse.json({ error: "Invalid Apple identity token." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid Apple identity token." },
+      { status: 401 },
+    );
   }
 
   const userId = await ensureAppleLinkedUser({
@@ -58,8 +64,7 @@ export async function POST(req: NextRequest) {
   const ua = req.headers.get("user-agent");
   const tokens = await issueDeviceTokens({
     userId,
-    deviceId:
-      typeof body.deviceId === "string" ? body.deviceId : undefined,
+    deviceId: typeof body.deviceId === "string" ? body.deviceId : undefined,
     userAgent: ua,
   });
 

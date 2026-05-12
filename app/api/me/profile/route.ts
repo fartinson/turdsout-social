@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getApiUserId } from "@/lib/api-auth";
+import { resolveAvatarUploadToPublicUrl } from "@/lib/avatar-storage";
 import { connectMongoose } from "@/lib/mongoose";
 import { getFollowCountsMap } from "@/lib/follow";
 import { UserProfile } from "@/models/UserProfile";
@@ -10,6 +11,7 @@ const UpdateSchema = z.object({
   handle: z.string().optional(),
   displayName: z.string().optional(),
   avatarUrl: z.string().optional(),
+  avatarUploadKey: z.string().optional(),
   privacy: z
     .object({
       showInFeed: z.boolean().optional(),
@@ -29,13 +31,12 @@ export async function GET(req: NextRequest) {
 
   await connectMongoose();
   const profile = await UserProfile.findOne({ userId }).lean();
-  const counts =
-    userId
-      ? (await getFollowCountsMap([userId])).get(userId) ?? {
-          followersCount: 0,
-          followingCount: 0,
-        }
-      : { followersCount: 0, followingCount: 0 };
+  const counts = userId
+    ? ((await getFollowCountsMap([userId])).get(userId) ?? {
+        followersCount: 0,
+        followingCount: 0,
+      })
+    : { followersCount: 0, followingCount: 0 };
   return NextResponse.json({
     profile: profile
       ? {
@@ -107,7 +108,24 @@ export async function PATCH(req: NextRequest) {
     update.displayName = v.length ? v : null;
   }
 
-  if (typeof input.data.avatarUrl === "string") {
+  if (typeof input.data.avatarUploadKey === "string") {
+    try {
+      update.avatarUrl = await resolveAvatarUploadToPublicUrl({
+        userId,
+        uploadKey: input.data.avatarUploadKey,
+      });
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Avatar upload could not be verified.",
+        },
+        { status: 400 },
+      );
+    }
+  } else if (typeof input.data.avatarUrl === "string") {
     const v = input.data.avatarUrl.trim().slice(0, 300);
     update.avatarUrl = v.length ? v : null;
   }
@@ -126,13 +144,12 @@ export async function PATCH(req: NextRequest) {
 
   await UserProfile.updateOne({ userId }, { $set: update });
   const fresh = await UserProfile.findOne({ userId }).lean();
-  const counts =
-    userId
-      ? (await getFollowCountsMap([userId])).get(userId) ?? {
-          followersCount: 0,
-          followingCount: 0,
-        }
-      : { followersCount: 0, followingCount: 0 };
+  const counts = userId
+    ? ((await getFollowCountsMap([userId])).get(userId) ?? {
+        followersCount: 0,
+        followingCount: 0,
+      })
+    : { followersCount: 0, followingCount: 0 };
 
   return NextResponse.json({
     profile: fresh

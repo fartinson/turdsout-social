@@ -16,5 +16,4 @@ export type AuthExchangeCodeDoc = InferSchemaType<
 > & { _id: unknown };
 
 export const AuthExchangeCode =
-  models.AuthExchangeCode ||
-  model("AuthExchangeCode", AuthExchangeCodeSchema);
+  models.AuthExchangeCode || model("AuthExchangeCode", AuthExchangeCodeSchema);

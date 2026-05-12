@@ -2,10 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEnvelope,
-  faSpinner,
-} from "@fortawesome/pro-solid-svg-icons";
+import { faEnvelope, faSpinner } from "@fortawesome/pro-solid-svg-icons";
 
 export function SignInSubmitButton() {
   const { pending } = useFormStatus();

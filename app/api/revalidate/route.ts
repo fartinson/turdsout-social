@@ -9,18 +9,19 @@ function unauthorized() {
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get("x-revalidate-secret") ?? "";
-  if (!env.REVALIDATE_WEBHOOK_SECRET || secret !== env.REVALIDATE_WEBHOOK_SECRET) {
+  if (
+    !env.REVALIDATE_WEBHOOK_SECRET ||
+    secret !== env.REVALIDATE_WEBHOOK_SECRET
+  ) {
     return unauthorized();
   }
 
-  const body = (await req.json().catch(() => null)) as
-    | {
-        slug?: string | null;
-        path?: string | null;
-        tags?: string[] | null;
-        data?: { slug?: string | null } | null; // Hygraph webhook payload shape
-      }
-    | null;
+  const body = (await req.json().catch(() => null)) as {
+    slug?: string | null;
+    path?: string | null;
+    tags?: string[] | null;
+    data?: { slug?: string | null } | null; // Hygraph webhook payload shape
+  } | null;
 
   const slugRaw =
     typeof body?.slug === "string"
@@ -30,7 +31,9 @@ export async function POST(req: NextRequest) {
         : null;
   const slug = slugRaw ? slugRaw.trim().toLowerCase() : null;
   const explicitPath = typeof body?.path === "string" ? body.path : null;
-  const tags = Array.isArray(body?.tags) ? body?.tags.filter((t): t is string => typeof t === "string") : [];
+  const tags = Array.isArray(body?.tags)
+    ? body?.tags.filter((t): t is string => typeof t === "string")
+    : [];
 
   if (explicitPath) revalidatePath(explicitPath);
   for (const tag of tags) revalidateTag(tag, "max");
@@ -43,4 +46,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
-

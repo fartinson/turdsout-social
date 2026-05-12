@@ -41,6 +41,21 @@ export const env = createEnv({
 
     /** Universal Links: `TEAMID.bundleid` for `/.well-known/apple-app-site-association`. */
     MOBILE_APPLINKS_APP_ID: z.string().min(1).optional(),
+
+    /** Optional comma-separated list of `TEAMID.bundleid` values for multiple mobile targets. */
+    MOBILE_APPLINKS_APP_IDS: z.string().min(1).optional(),
+
+    /** AWS region for S3-backed avatar uploads. */
+    AWS_REGION: z.string().min(1).optional(),
+
+    /** S3 bucket that stores uploaded avatar images. */
+    AVATAR_UPLOAD_BUCKET: z.string().min(1).optional(),
+
+    /** Public base URL for avatar delivery, ideally a CloudFront distribution. */
+    AVATAR_PUBLIC_BASE_URL: z.string().url().optional(),
+
+    /** Optional object-key prefix within the avatar upload bucket. */
+    AVATAR_UPLOAD_KEY_PREFIX: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),

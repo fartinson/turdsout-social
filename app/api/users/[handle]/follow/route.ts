@@ -14,7 +14,9 @@ async function resolveTargetProfile(rawHandle: string) {
 }
 
 async function buildResponse(targetUserId: string, viewerFollows: boolean) {
-  const counts = (await getFollowCountsMap([targetUserId])).get(targetUserId) ?? {
+  const counts = (await getFollowCountsMap([targetUserId])).get(
+    targetUserId,
+  ) ?? {
     followersCount: 0,
     followingCount: 0,
   };
