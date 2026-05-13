@@ -33,7 +33,7 @@ export default async function ContinueSignInPage({
         Welcome Back!
       </h1>
       <p className="text-muted mt-3 text-sm text-pretty">
-        Continue to finish signing in to Turdsout.
+        To finish siging in to Turdsout, click continue.
       </p>
 
       <a
