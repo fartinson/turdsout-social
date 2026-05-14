@@ -9,7 +9,7 @@ export function FeedPostInviteCard({ signedIn }: Props) {
   return (
     <section className="border-border bg-surface mt-6 rounded-2xl border border-dashed p-6 text-sm">
       <p className="text-foreground font-semibold">
-        Got a better one? Let&apos;s hear it.
+        Got a better one? Let&apos;s have it.
       </p>
       <p className="text-muted mt-1">
         {signedIn ? "Drop your own turd." : "Sign in to drop your own turd."}

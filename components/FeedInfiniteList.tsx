@@ -9,10 +9,16 @@ type FeedItem = {
   body: string;
   upvotes: number;
   downvotes: number;
+  replyCount?: number;
   createdAt: string;
   author: { handle: string | null; avatarUrl: string | null };
   viewerVote: 1 | -1 | 0;
   viewerBookmarked: boolean;
+  mentions?: {
+    userId: string;
+    handle: string | null;
+    displayName: string | null;
+  }[];
 };
 
 export function FeedInfiniteList({
@@ -150,6 +156,7 @@ export function FeedInfiniteList({
           body={p.body}
           createdAt={p.createdAt}
           author={{ handle: p.author.handle, avatarUrl: p.author.avatarUrl }}
+          mentions={p.mentions}
           signedIn={signedIn}
           initialUpvotes={p.upvotes}
           initialDownvotes={p.downvotes}

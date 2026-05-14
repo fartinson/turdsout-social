@@ -191,7 +191,9 @@ export async function fetchMobileCmsBundle(): Promise<MobileCmsBundle> {
 
   for (const page of [...normalizePageDetails(footerPages), ...pinnedPages]) {
     if (!page) continue;
-    deduped.set(page.slug, normalizePageDetail(page));
+    const slug = page.slug?.trim();
+    if (!slug) continue;
+    deduped.set(slug, normalizePageDetail(page));
   }
 
   return {

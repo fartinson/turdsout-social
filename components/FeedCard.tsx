@@ -20,11 +20,20 @@ export type FeedCardAuthor = {
   avatarUrl: string | null;
 };
 
+export type FeedCardMention = {
+  userId: string;
+  handle: string | null;
+  displayName: string | null;
+};
+
 export type FeedCardProps = {
   postId: string;
   body: string;
   createdAt: string;
   author: FeedCardAuthor;
+
+  /** Optional tagged users (not stored in body text). */
+  mentions?: FeedCardMention[];
 
   signedIn: boolean;
   initialUpvotes: number;
@@ -41,6 +50,7 @@ export function FeedCard({
   body,
   createdAt,
   author,
+  mentions = [],
   signedIn,
   initialUpvotes,
   initialDownvotes,
@@ -56,6 +66,33 @@ export function FeedCard({
       >
         {body}
       </Link>
+
+      {mentions.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {mentions.map((m) => {
+            const label =
+              m.displayName?.trim() && m.handle
+                ? `${m.displayName.trim()} (@${m.handle})`
+                : m.displayName?.trim()
+                  ? m.displayName.trim()
+                  : m.handle
+                    ? `@${m.handle}`
+                    : "Tagged user";
+            const inner = (
+              <span className="border-border bg-background text-foreground inline-flex max-w-full items-center rounded-full border px-3 py-1 text-xs font-semibold">
+                <span className="truncate">{label}</span>
+              </span>
+            );
+            return m.handle ? (
+              <Link key={m.userId} href={routes.userProfile(m.handle)}>
+                {inner}
+              </Link>
+            ) : (
+              <span key={m.userId}>{inner}</span>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="text-muted mt-3 flex flex-wrap items-center gap-2 text-xs">
         <Link

@@ -10,6 +10,8 @@ import { Bookmark } from "@/models/Bookmark";
 import { FeedCard } from "@/components/FeedCard";
 import { Avatar } from "@/components/Avatar";
 import { FeedPostInviteCard } from "@/components/FeedPostInviteCard";
+import { buildMentionsJson } from "@/lib/json-feed-post";
+import { loadMentionProfilesMap } from "@/lib/post-mentions";
 
 export default async function PublicProfilePage({
   params,
@@ -58,6 +60,16 @@ export default async function PublicProfilePage({
     }
     for (const b of bookmarks) bookmarkByPostId.add(String(b.postId));
   }
+
+  const mentionUserIds = [
+    ...new Set(
+      posts.flatMap((p) => {
+        const m = p.mentionedUserIds;
+        return Array.isArray(m) ? m.map((id: unknown) => String(id)) : [];
+      }),
+    ),
+  ];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionUserIds);
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
@@ -110,6 +122,10 @@ export default async function PublicProfilePage({
                 handle: profile.handle ?? null,
                 avatarUrl: profile.avatarUrl ?? null,
               }}
+              mentions={buildMentionsJson(
+                Array.isArray(p.mentionedUserIds) ? p.mentionedUserIds : [],
+                mentionProfilesById,
+              )}
               signedIn={Boolean(session?.user)}
               initialUpvotes={p.upvotes ?? 0}
               initialDownvotes={p.downvotes ?? 0}

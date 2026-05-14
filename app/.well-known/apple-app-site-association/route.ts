@@ -38,7 +38,7 @@ function getConfiguredAppIds() {
   return Array.from(
     new Set(
       [env.MOBILE_APPLINKS_APP_IDS, env.MOBILE_APPLINKS_APP_ID]
-        .filter(Boolean)
+        .filter((v): v is string => Boolean(v))
         .flatMap((value) => value.split(","))
         .map((value) => value.trim())
         .filter(Boolean),

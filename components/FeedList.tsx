@@ -5,16 +5,24 @@ import { UserProfile } from "@/models/UserProfile";
 import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
 import { FeedCard } from "@/components/FeedCard";
+import { buildMentionsJson } from "@/lib/json-feed-post";
+import { loadMentionProfilesMap } from "@/lib/post-mentions";
 
 type FeedItem = {
   id: string;
   body: string;
   upvotes: number;
   downvotes: number;
+  replyCount: number;
   createdAt: string;
   author: { userId: string; handle: string | null; avatarUrl: string | null };
   viewerVote: 1 | -1 | 0;
   viewerBookmarked: boolean;
+  mentions: {
+    userId: string;
+    handle: string | null;
+    displayName: string | null;
+  }[];
 };
 
 async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
@@ -49,6 +57,16 @@ async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
   const voteByPostId = new Map<string, 1 | -1>();
   const bookmarkByPostId = new Set<string>();
 
+  const mentionUserIds = [
+    ...new Set(
+      posts.flatMap((p) => {
+        const m = p.mentionedUserIds;
+        return Array.isArray(m) ? m.map((id: unknown) => String(id)) : [];
+      }),
+    ),
+  ];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionUserIds);
+
   if (viewerUserId && postIds.length) {
     const [votes, bookmarks] = await Promise.all([
       Vote.find({ userId: viewerUserId, postId: { $in: postIds } })
@@ -71,6 +89,7 @@ async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
       body: p.body,
       upvotes: p.upvotes ?? 0,
       downvotes: p.downvotes ?? 0,
+      replyCount: p.replyCount ?? 0,
       createdAt: p.createdAt?.toISOString?.() ?? new Date().toISOString(),
       author: profileById.get(String(p.authorUserId)) ?? {
         userId: String(p.authorUserId),
@@ -79,6 +98,10 @@ async function getFeed(sort: "top" | "new", viewerUserId: string | null) {
       },
       viewerVote: voteByPostId.get(String(p._id)) ?? 0,
       viewerBookmarked: bookmarkByPostId.has(String(p._id)),
+      mentions: buildMentionsJson(
+        Array.isArray(p.mentionedUserIds) ? p.mentionedUserIds : [],
+        mentionProfilesById,
+      ),
     })),
   } as { items: FeedItem[] };
 }
@@ -105,6 +128,7 @@ export async function FeedList({ sort }: { sort: "top" | "new" }) {
           body={p.body}
           createdAt={p.createdAt}
           author={{ handle: p.author.handle, avatarUrl: p.author.avatarUrl }}
+          mentions={p.mentions}
           signedIn={Boolean(session?.user)}
           initialUpvotes={p.upvotes}
           initialDownvotes={p.downvotes}

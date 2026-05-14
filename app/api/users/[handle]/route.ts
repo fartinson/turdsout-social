@@ -1,12 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getApiUserId } from "@/lib/api-auth";
-import { toFeedItemJson } from "@/lib/json-feed-post";
+import { buildMentionsJson, toFeedItemJson } from "@/lib/json-feed-post";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { UserProfile } from "@/models/UserProfile";
 import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
 import { getFollowCountsMap, getViewerFollowSet } from "@/lib/follow";
+import { loadMentionProfilesMap } from "@/lib/post-mentions";
 
 export async function GET(
   req: NextRequest,
@@ -84,12 +85,26 @@ export async function GET(
     followingCount: 0,
   };
 
+  const mentionUserIds = [
+    ...new Set(
+      pagePosts.flatMap((p) => {
+        const m = p.mentionedUserIds;
+        return Array.isArray(m) ? m.map((id: unknown) => String(id)) : [];
+      }),
+    ),
+  ];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionUserIds);
+
   const items = pagePosts.map((p) =>
     toFeedItemJson(
       p,
       author,
       viewerId ? (voteByPostId.get(String(p._id)) ?? 0) : 0,
       viewerId ? bookmarkByPostId.has(String(p._id)) : false,
+      buildMentionsJson(
+        Array.isArray(p.mentionedUserIds) ? p.mentionedUserIds : [],
+        mentionProfilesById,
+      ),
     ),
   );
 

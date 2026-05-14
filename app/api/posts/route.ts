@@ -1,12 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getApiUserId } from "@/lib/api-auth";
-import { toFeedItemJson } from "@/lib/json-feed-post";
+import { buildMentionsJson, toFeedItemJson } from "@/lib/json-feed-post";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
 import { UserProfile } from "@/models/UserProfile";
 import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
 import { validatePostBody } from "@/lib/content-rules";
+import {
+  loadMentionProfilesMap,
+  normalizeMentionUserIdsInput,
+  validateMentionsForCreate,
+} from "@/lib/post-mentions";
 import { getViewerFollowedUserIds } from "@/lib/follow";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 import { rateLimiters } from "@/lib/ratelimit";
@@ -83,6 +88,15 @@ export async function GET(req: NextRequest) {
   );
 
   const pagePosts = posts.slice(0, limit);
+  const mentionUserIds = [
+    ...new Set(
+      pagePosts.flatMap((p) => {
+        const m = p.mentionedUserIds;
+        return Array.isArray(m) ? m.map((id: unknown) => String(id)) : [];
+      }),
+    ),
+  ];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionUserIds);
   const postIds = pagePosts.map((p) => p._id);
 
   const voteByPostId = new Map<string, 1 | -1>();
@@ -114,6 +128,10 @@ export async function GET(req: NextRequest) {
       author,
       viewerId ? (voteByPostId.get(String(p._id)) ?? 0) : 0,
       viewerId ? bookmarkByPostId.has(String(p._id)) : false,
+      buildMentionsJson(
+        Array.isArray(p.mentionedUserIds) ? p.mentionedUserIds : [],
+        mentionProfilesById,
+      ),
     );
   });
 
@@ -146,6 +164,8 @@ export async function POST(req: NextRequest) {
     turnstileToken?: string;
     /** Optional: bound device session skips captcha (see turnstile-trust). */
     refreshToken?: string;
+    /** Optional tagged users (internal user ids), max enforced server-side. */
+    mentionedUserIds?: unknown;
   };
 
   if (body.hp) {
@@ -182,14 +202,24 @@ export async function POST(req: NextRequest) {
 
   await connectMongoose();
 
+  const mentionCandidates = normalizeMentionUserIdsInput(body.mentionedUserIds);
+  const mentionCheck = await validateMentionsForCreate(userId, mentionCandidates);
+  if (!mentionCheck.ok) {
+    return NextResponse.json({ error: mentionCheck.error }, { status: 400 });
+  }
+
   const created = await Post.create({
     authorUserId: userId,
     body: validated.body,
+    mentionedUserIds: mentionCheck.ids,
   });
 
   const profile = await UserProfile.findOne({ userId: String(userId) })
     .select({ handle: 1, avatarUrl: 1 })
     .lean();
+
+  const mentionProfilesById = await loadMentionProfilesMap(mentionCheck.ids);
+  const mentionsJson = buildMentionsJson(mentionCheck.ids, mentionProfilesById);
 
   const res = NextResponse.json(
     {
@@ -200,10 +230,12 @@ export async function POST(req: NextRequest) {
           created.createdAt?.toISOString?.() ?? new Date().toISOString(),
         upvotes: created.upvotes ?? 0,
         downvotes: created.downvotes ?? 0,
+        replyCount: created.replyCount ?? 0,
         author: {
           handle: profile?.handle ?? null,
           avatarUrl: profile?.avatarUrl ?? null,
         },
+        mentions: mentionsJson,
       },
     },
     { status: 201 },

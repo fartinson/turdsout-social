@@ -53,4 +53,12 @@ export const rateLimiters = {
         prefix: "rl:bookmark",
       })
     : null,
+  createReply: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(12, "10 m"),
+        analytics: true,
+        prefix: "rl:reply",
+      })
+    : null,
 };

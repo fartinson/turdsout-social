@@ -10,6 +10,8 @@ import { Bookmark } from "@/models/Bookmark";
 import { FeedCard } from "@/components/FeedCard";
 import { routes } from "@/lib/routes";
 import { FeedPostInviteCard } from "@/components/FeedPostInviteCard";
+import { buildMentionsJson } from "@/lib/json-feed-post";
+import { loadMentionProfilesMap } from "@/lib/post-mentions";
 
 function trunc(s: string, max: number) {
   const t = s.trim();
@@ -104,6 +106,12 @@ export default async function PostPermalinkPage({
     ? new Date(post.createdAt).toISOString()
     : new Date().toISOString();
 
+  const mentionIds = Array.isArray(post.mentionedUserIds)
+    ? post.mentionedUserIds.map((id: unknown) => String(id))
+    : [];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionIds);
+  const mentions = buildMentionsJson(post.mentionedUserIds, mentionProfilesById);
+
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
       <FeedCard
@@ -111,6 +119,7 @@ export default async function PostPermalinkPage({
         body={post.body}
         createdAt={created}
         author={{ handle: author.handle, avatarUrl: author.avatarUrl }}
+        mentions={mentions}
         signedIn={Boolean(session?.user)}
         initialUpvotes={post.upvotes ?? 0}
         initialDownvotes={post.downvotes ?? 0}

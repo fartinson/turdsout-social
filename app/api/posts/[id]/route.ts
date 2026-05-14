@@ -1,12 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isValidObjectId } from "mongoose";
 import { getApiUserId } from "@/lib/api-auth";
-import { toFeedItemJson } from "@/lib/json-feed-post";
+import { buildMentionsJson, toFeedItemJson } from "@/lib/json-feed-post";
 import { connectMongoose } from "@/lib/mongoose";
 import { Post } from "@/models/Post";
+import { Reply } from "@/models/Reply";
 import { UserProfile } from "@/models/UserProfile";
 import { Vote } from "@/models/Vote";
 import { Bookmark } from "@/models/Bookmark";
+import { loadMentionProfilesMap } from "@/lib/post-mentions";
 
 export async function GET(
   req: NextRequest,
@@ -58,6 +60,25 @@ export async function GET(
     viewerBookmarked = Boolean(bm);
   }
 
-  const item = toFeedItemJson(post, author, viewerVote, viewerBookmarked);
+  const mentionIds = Array.isArray(post.mentionedUserIds)
+    ? post.mentionedUserIds.map((id: unknown) => String(id))
+    : [];
+  const mentionProfilesById = await loadMentionProfilesMap(mentionIds);
+
+  const actualReplyCount = await Reply.countDocuments({
+    postId: post._id,
+    status: { $ne: "hidden" },
+  });
+  if ((post.replyCount ?? 0) !== actualReplyCount) {
+    void Post.updateOne({ _id: post._id }, { $set: { replyCount: actualReplyCount } });
+  }
+
+  const item = toFeedItemJson(
+    { ...post, replyCount: actualReplyCount },
+    author,
+    viewerVote,
+    viewerBookmarked,
+    buildMentionsJson(post.mentionedUserIds, mentionProfilesById),
+  );
   return NextResponse.json({ post: item });
 }

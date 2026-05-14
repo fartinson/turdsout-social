@@ -12,13 +12,18 @@ const PostSchema = new Schema(
     },
     upvotes: { type: Number, default: 0 },
     downvotes: { type: Number, default: 0 },
+    /** Denormalized count of live replies (see Reply model). */
+    replyCount: { type: Number, default: 0 },
     reports: { type: Number, default: 0 },
+    /** Tagged users (by internal user id); max length enforced in API. */
+    mentionedUserIds: { type: [String], default: [] },
   },
   { timestamps: true },
 );
 
 PostSchema.index({ status: 1, createdAt: -1 });
 PostSchema.index({ status: 1, upvotes: -1, createdAt: -1 });
+PostSchema.index({ status: 1, mentionedUserIds: 1 });
 
 export type PostDoc = InferSchemaType<typeof PostSchema> & { _id: unknown };
 
